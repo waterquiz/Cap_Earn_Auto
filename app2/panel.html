@@ -163,7 +163,7 @@
                 iframe.name = frameId;
             }
             // Synchronous XHR ensures HTML is saved in memory before iframe navigates
-            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || 'http://127.0.0.1:5000').replace(/\/+$/, '');
+            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || 'https://capearnauto-production.up.railway.app').replace(/\/+$/, '');
             try {
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', captchaServer + '/store_captcha_frame', false); // Synchronous
