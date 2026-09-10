@@ -9,291 +9,786 @@ CORS(app)
 
 CAPTCHA_FRAMES = {}
 
-DASHBOARD_HTML = """
+PURE_SOLVER_HTML = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CaptchaTyper - Railway Cloud Server</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Pure Solver</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #0b0f19;
-            color: #e2e8f0;
+            background-color: #080c14;
+            color: #d1d5db;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
             min-height: 100vh;
-            padding: 30px 20px;
         }
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 24px 30px;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            margin-bottom: 24px;
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .logo-icon {
-            width: 48px;
+
+        /* Top Title Bar */
+        #ct-title-bar {
             height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
+            background: #0d131f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 2px solid #1e293b;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .ct-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ct-shield-logo {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00f0ff, #0077ff);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            color: #080c14;
+            font-size: 14px;
+            font-weight: 900;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
         }
-        h1 { font-size: 22px; font-weight: 700; color: #fff; }
-        .subtitle { font-size: 13px; color: #94a3b8; margin-top: 2px; }
-        .badge {
-            display: inline-flex;
+
+        .ct-logo-container h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .typer-text {
+            color: #00e5ff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .ct-center-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ct-settings-group {
+            display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            background: rgba(34, 197, 94, 0.12);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, 0.3);
             font-size: 13px;
             font-weight: 600;
+            color: #94a3b8;
         }
-        .dot {
+
+        .ct-settings-group input[type="number"], .ct-settings-group select {
+            background: #151d2e;
+            border: 1px solid #334155;
+            color: #00f0ff;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            width: 60px;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .ct-settings-group input[type="number"]:focus, .ct-settings-group select:focus {
+            border-color: #00f0ff;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+        }
+
+        #ct-create-panels-btn {
+            background: #0284c7;
+            color: #ffffff;
+            border: none;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+        }
+
+        #ct-create-panels-btn:hover {
+            background: #0369a1;
+            transform: translateY(-1px);
+        }
+
+        .ct-window-actions-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ct-control-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .ct-control-btn:hover {
+            background: #1e293b;
+            color: #ffffff;
+        }
+
+        /* Multi-panel Grid Container */
+        #panels-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 10px;
+            background: #060911;
+        }
+
+        /* Individual Captcha Panel Card */
+        .ct-panel {
+            background: #ffffff;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            height: 480px;
+        }
+
+        /* Panel Header */
+        .panel-header {
+            background: #006699;
+            color: #ffffff;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .panel-status-dot {
             width: 8px;
             height: 8px;
             background: #22c55e;
             border-radius: 50%;
-            box-shadow: 0 0 10px #22c55e;
-            animation: pulse 2s infinite;
+            box-shadow: 0 0 6px #22c55e;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.85); }
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 18px;
-            margin-bottom: 24px;
-        }
-        .card {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 14px;
-            padding: 22px;
-            backdrop-filter: blur(10px);
-        }
-        .card-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-        .card-value { font-size: 24px; font-weight: 700; color: #fff; margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
-        .card-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
-        .section-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: #f1f5f9;
-            margin-bottom: 14px;
+
+        .panel-tools {
             display: flex;
             align-items: center;
             gap: 8px;
+            color: #bae6fd;
+            font-size: 11px;
         }
-        .endpoints {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+
+        .panel-tools i {
+            cursor: pointer;
+            transition: color 0.2s;
         }
-        .endpoint-item {
+
+        .panel-tools i:hover {
+            color: #ffffff;
+        }
+
+        /* Action bar below header */
+        .panel-action-bar {
+            background: #f8fafc;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 18px;
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            border-radius: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
+            border-bottom: 1px solid #e2e8f0;
         }
-        .method {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 6px;
+
+        .panel-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-size: 11px;
-            font-weight: 700;
-            margin-right: 10px;
+            color: #64748b;
+            cursor: pointer;
         }
-        .get { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .post { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
-        .both { background: rgba(234, 179, 8, 0.2); color: #facc15; }
-        .ep-url { color: #f8fafc; font-weight: 500; }
-        .btn-test {
-            background: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            padding: 5px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 500;
+
+        .panel-timer {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0284c7;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        .panel-timer.warning {
+            color: #ef4444;
+            animation: timerBlink 1s infinite alternate;
+        }
+
+        @keyframes timerBlink {
+            0% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .skip-btn {
+            background: #f59e0b;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.4);
             transition: all 0.2s;
         }
-        .btn-test:hover {
-            background: rgba(99, 102, 241, 0.35);
-            color: #fff;
+
+        .skip-btn:hover {
+            background: #d97706;
+            transform: scale(1.05);
         }
-        .instructions {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(99, 102, 241, 0.25);
-            border-radius: 14px;
-            padding: 24px;
-            margin-top: 24px;
-        }
-        .step {
+
+        /* Captcha Content Box */
+        .captcha-challenge-container {
+            flex: 1;
             display: flex;
-            gap: 14px;
-            margin-top: 14px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px;
+            background: #ffffff;
+            overflow: hidden;
         }
-        .step-num {
-            width: 28px;
-            height: 28px;
-            background: #4f46e5;
-            color: #fff;
+
+        /* reCAPTCHA Blue Header Banner */
+        .recaptcha-header-banner {
+            background: #1d4ed8;
+            color: #ffffff;
+            width: 100%;
+            max-width: 250px;
+            padding: 8px 12px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            text-align: left;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .recaptcha-header-banner .recaptcha-prompt {
+            font-size: 11px;
+            line-height: 1.2;
+        }
+
+        .recaptcha-header-banner .recaptcha-target {
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: lowercase;
+            margin: 2px 0;
+            display: block;
+        }
+
+        .recaptcha-header-banner .recaptcha-sub {
+            font-size: 10px;
+            opacity: 0.9;
+        }
+
+        /* 3x3 Tile Grid */
+        .tiles-grid {
+            width: 100%;
+            max-width: 250px;
+            height: 250px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: #e2e8f0;
+            padding: 2px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .tile {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .tile:hover {
+            opacity: 0.9;
+        }
+
+        .tile.selected::after {
+            content: '?';
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: #2563eb;
+            color: #ffffff;
             border-radius: 50%;
+            font-size: 12px;
+            font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
-        .step-content { font-size: 14px; line-height: 1.6; color: #cbd5e1; }
-        pre {
-            background: #030712;
-            border: 1px solid rgba(148, 163, 184, 0.15);
-            padding: 10px 14px;
+
+        .tile.selected {
+            outline: 3px solid #2563eb;
+            outline-offset: -3px;
+        }
+
+        /* hCaptcha Alternate Challenge */
+        .hcaptcha-challenge {
+            width: 100%;
+            max-width: 250px;
+            height: 290px;
+            background: #007a87;
+            border-radius: 6px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .hcaptcha-top {
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .hcaptcha-body {
+            flex: 1;
+            background: radial-gradient(circle at center, #0284c7 0%, #0369a1 50%, #0c4a6e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hcaptcha-graphic {
+            width: 140px;
+            height: 140px;
+            border: 2px dashed rgba(255,255,255,0.4);
             border-radius: 8px;
-            margin-top: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .hcaptcha-graphic:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.05);
+        }
+
+        /* Panel Footer */
+        .panel-footer {
+            background: #006699;
+            color: #e0f2fe;
+            padding: 4px 8px;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #0284c7;
+        }
+
+        .rate-notice {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 78%;
+        }
+
+        .worker-id {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 800;
             color: #38bdf8;
-            overflow-x: auto;
+            font-size: 10px;
+        }
+
+        /* Settings Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-card {
+            background: #0d131f;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 480px;
+            padding: 24px;
+            color: #e2e8f0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 12px;
+        }
+
+        .modal-header h2 { font-size: 18px; color: #00f0ff; }
+        .modal-close { background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+        .form-row { margin-bottom: 16px; }
+        .form-row label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .form-row select, .form-row input {
+            width: 100%;
+            background: #151d2e;
+            border: 1px solid #334155;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .btn-save-modal {
+            background: #0284c7;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="brand">
-                <div class="logo-icon">⚡</div>
-                <div>
-                    <h1>CaptchaTyper Cloud Service</h1>
-                    <div class="subtitle">Hosted on Railway &bull; Python Proxy & Frame Engine</div>
-                </div>
+    <!-- Top Header Bar -->
+    <header id="ct-title-bar">
+        <div class="ct-logo-container">
+            <div class="ct-shield-logo">PS</div>
+            <h1>Pure<span class="typer-text"> Solver</span></h1>
+        </div>
+
+        <div class="ct-center-container">
+            <div class="ct-settings-group">
+                <label for="ct-panel-count">Panels:</label>
+                <input type="number" id="ct-panel-count" value="12" min="1" max="100">
+                <button id="ct-create-panels-btn">Set & Relaunch</button>
             </div>
-            <div class="badge">
-                <span class="dot"></span>
-                <span>ONLINE & ACTIVE</span>
+
+            <div class="ct-settings-group">
+                <label for="ct-columns">Columns:</label>
+                <select id="ct-columns">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="6">6</option>
+                </select>
             </div>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <div class="card-label">Service Status</div>
-                <div class="card-value" style="color: #4ade80;">Operational</div>
-                <div class="card-sub">All healthchecks passing</div>
-            </div>
-            <div class="card">
-                <div class="card-label">Active Cached Frames</div>
-                <div class="card-value">{{ frames_count }}</div>
-                <div class="card-sub">Memory managed automatically</div>
-            </div>
-            <div class="card">
-                <div class="card-label">Host Domain</div>
-                <div class="card-value" style="font-size: 14px; word-break: break-all;">{{ host }}</div>
-                <div class="card-sub">Railway Public Gateway</div>
-            </div>
+        <div class="ct-window-actions-container">
+            <button id="ct-settings-btn" class="ct-control-btn" title="Settings"><i class="fas fa-cog"></i></button>
+            <button id="ct-fullscreen-btn" class="ct-control-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
         </div>
+    </header>
 
-        <div class="card">
-            <div class="section-title">📡 Active Server Endpoints</div>
-            <ul class="endpoints">
-                <li class="endpoint-item">
-                    <div>
-                        <span class="method get">GET</span>
-                        <span class="ep-url">/health</span>
-                    </div>
-                    <a class="btn-test" href="/health" target="_blank">Test &rarr;</a>
-                </li>
-                <li class="endpoint-item">
-                    <div>
-                        <span class="method both">GET / POST</span>
-                        <span class="ep-url">/proxy_captcha</span>
-                    </div>
-                    <span style="font-size: 12px; color: #64748b;">Proxy reCAPTCHA / hCaptcha</span>
-                </li>
-                <li class="endpoint-item">
-                    <div>
-                        <span class="method post">POST</span>
-                        <span class="ep-url">/store_captcha_frame</span>
-                    </div>
-                    <span style="font-size: 12px; color: #64748b;">Store HTML frame memory</span>
-                </li>
-                <li class="endpoint-item">
-                    <div>
-                        <span class="method get">GET</span>
-                        <span class="ep-url">/render_captcha_frame</span>
-                    </div>
-                    <span style="font-size: 12px; color: #64748b;">Render cached frame</span>
-                </li>
-            </ul>
-        </div>
+    <!-- Multi-panel Grid -->
+    <div id="panels-grid"></div>
 
-        <div class="instructions">
-            <div class="section-title">💻 How to Open the Windows GUI Software</div>
-            
-            <div class="step">
-                <div class="step-num">1</div>
-                <div class="step-content">
-                    <strong>Launch the Windows App Locally:</strong>
-                    The Windows GUI panel is an Electron desktop app that runs on your Windows desktop. Open your terminal in the project folder and start it:
-                    <pre>npm start</pre>
-                    Or double-click <code>launch_test.bat</code> on your desktop.
-                </div>
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2><i class="fas fa-sliders-h"></i> Pure Solver Settings</h2>
+                <button class="modal-close" id="close-modal-btn">&times;</button>
             </div>
-
-            <div class="step">
-                <div class="step-num">2</div>
-                <div class="step-content">
-                    <strong>Connected to this Railway Server:</strong>
-                    Your local Windows desktop software is configured to connect to this Railway cloud URL:
-                    <pre>{{ host }}</pre>
-                    All captcha frame handling and proxy requests from your desktop windows will route through this Railway server!
-                </div>
+            <div class="form-row">
+                <label>Active Solver Engine</label>
+                <select>
+                    <option selected>CaptchaSonic / CaptchaAI</option>
+                    <option>JA Enabled (Auto Solve)</option>
+                    <option>Custom Qwen URL AI</option>
+                </select>
             </div>
+            <div class="form-row">
+                <label>Proxy Mode</label>
+                <select>
+                    <option selected>No Proxies (Direct)</option>
+                    <option>Manual Proxies (Round Robin)</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>Audio Notifications</label>
+                <select>
+                    <option selected>Enabled</option>
+                    <option>Disabled</option>
+                </select>
+            </div>
+            <button class="btn-save-modal" id="save-modal-btn">Save & Apply</button>
         </div>
     </div>
+
+    <script>
+        const CHALLENGE_TARGETS = [
+            'bus',
+            'motorcycles',
+            'crosswalks',
+            'bicycles',
+            'traffic lights',
+            'a fire hydrant',
+            'tractors',
+            'cars'
+        ];
+
+        const TILE_IMAGES = [
+            'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1528728329032-2972f65dfb3f?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1558980664-769d59546b3d?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1508974239320-0a029497e820?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1558981803-33924f0c62b6?w=200&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=200&h=200&fit=crop'
+        ];
+
+        const WORKER_IDS = ['ada1', 'ada2', 'ada3', 'fraz1', 'fraz2', 'fraz3', 'fraz4', 'ada4', 'ada5', 'pay1', 'pay2', 'pay3', 'pay4', 'fraz5', 'ada6', 'pay5'];
+
+        function createPanelElement(index) {
+            const panel = document.createElement('div');
+            panel.className = 'ct-panel';
+            panel.id = `panel-${index}`;
+
+            const workerName = WORKER_IDS[index % WORKER_IDS.length];
+            const isHcaptcha = (index === 7 || index === 10);
+            const targetWord = CHALLENGE_TARGETS[index % CHALLENGE_TARGETS.length];
+            let timerValue = Math.floor(40 + Math.random() * 75);
+            if (index === 2) timerValue = 16; // As in screenshot
+            if (index === 6) timerValue = 26;
+
+            let challengeContent = '';
+            if (isHcaptcha) {
+                challengeContent = `
+                    <div class="hcaptcha-challenge">
+                        <div class="hcaptcha-top">
+                            Click the object that breaks the column pattern
+                        </div>
+                        <div class="hcaptcha-body">
+                            <div class="hcaptcha-graphic" onclick="this.innerHTML='?'">
+                                <i class="fas fa-shapes"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                let tilesHtml = '';
+                for (let t = 0; t < 9; t++) {
+                    const imgUrl = TILE_IMAGES[(index * 3 + t) % TILE_IMAGES.length];
+                    const isPreselected = (t === 2 || t === 7 || t === 8) && (index % 2 === 0);
+                    tilesHtml += `<div class="tile ${isPreselected ? 'selected' : ''}" style="background-image: url('${imgUrl}')" onclick="this.classList.toggle('selected')"></div>`;
+                }
+
+                challengeContent = `
+                    <div class="recaptcha-header-banner">
+                        <div class="recaptcha-prompt">Select all squares with</div>
+                        <span class="recaptcha-target">${targetWord}</span>
+                        <div class="recaptcha-sub">Click verify once there are none left.</div>
+                    </div>
+                    <div class="tiles-grid">
+                        ${tilesHtml}
+                    </div>
+                `;
+            }
+
+            panel.innerHTML = `
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="panel-status-dot"></span>
+                        <span>CaptchaTypersOR <small style="font-size: 10px; opacity: 0.8;">v0.6.0</small></span>
+                    </div>
+                    <div class="panel-tools">
+                        <i class="fas fa-volume-up" title="Audio"></i>
+                        <i class="fas fa-minus" title="Minimize"></i>
+                        <i class="fas fa-sync-alt" title="Reload" onclick="reloadPanel(${index})"></i>
+                        <i class="fas fa-times" title="Close"></i>
+                    </div>
+                </div>
+
+                <div class="panel-action-bar">
+                    <label class="panel-checkbox-label">
+                        <input type="checkbox" checked>
+                        <span>I'm not a robot</span>
+                    </label>
+                    <div class="panel-timer ${timerValue < 30 ? 'warning' : ''}" id="timer-${index}">
+                        <span>${timerValue}</span>
+                        <i class="far fa-clock" style="font-size: 15px;"></i>
+                    </div>
+                    <button class="skip-btn" onclick="reloadPanel(${index})">SKIP</button>
+                </div>
+
+                <div class="captcha-challenge-container" id="challenge-${index}">
+                    ${challengeContent}
+                </div>
+
+                <div class="panel-footer">
+                    <span class="rate-notice">$1.25 per 1k for 5 hours daily between 12am to 5am IST or 1pm to 6pm EST or 3pm to 8pm caracas time</span>
+                    <span class="worker-id">${workerName}</span>
+                </div>
+            `;
+
+            return { element: panel, timer: timerValue };
+        }
+
+        const panelTimers = {};
+
+        function renderGrid(count = 12) {
+            const grid = document.getElementById('panels-grid');
+            grid.innerHTML = '';
+            
+            // Clear existing intervals
+            Object.values(panelTimers).forEach(clearInterval);
+
+            for (let i = 0; i < count; i++) {
+                const { element, timer } = createPanelElement(i);
+                grid.appendChild(element);
+
+                // Run countdown
+                let timeLeft = timer;
+                panelTimers[i] = setInterval(() => {
+                    timeLeft--;
+                    if (timeLeft <= 0) timeLeft = 120;
+                    const timerEl = document.getElementById(`timer-${i}`);
+                    if (timerEl) {
+                        timerEl.querySelector('span').textContent = timeLeft;
+                        if (timeLeft < 30) timerEl.classList.add('warning');
+                        else timerEl.classList.remove('warning');
+                    }
+                }, 1000);
+            }
+        }
+
+        function reloadPanel(index) {
+            const targetWord = CHALLENGE_TARGETS[Math.floor(Math.random() * CHALLENGE_TARGETS.length)];
+            const challengeEl = document.getElementById(`challenge-${index}`);
+            if (challengeEl) {
+                let tilesHtml = '';
+                for (let t = 0; t < 9; t++) {
+                    const imgUrl = TILE_IMAGES[Math.floor(Math.random() * TILE_IMAGES.length)];
+                    tilesHtml += `<div class="tile" style="background-image: url('${imgUrl}')" onclick="this.classList.toggle('selected')"></div>`;
+                }
+                challengeEl.innerHTML = `
+                    <div class="recaptcha-header-banner">
+                        <div class="recaptcha-prompt">Select all squares with</div>
+                        <span class="recaptcha-target">${targetWord}</span>
+                        <div class="recaptcha-sub">Click verify once there are none left.</div>
+                    </div>
+                    <div class="tiles-grid">
+                        ${tilesHtml}
+                    </div>
+                `;
+            }
+            const timerEl = document.getElementById(`timer-${index}`);
+            if (timerEl) {
+                timerEl.querySelector('span').textContent = '120';
+                timerEl.classList.remove('warning');
+            }
+        }
+
+        // Set & Relaunch button
+        document.getElementById('ct-create-panels-btn').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('ct-panel-count').value) || 12;
+            renderGrid(count);
+        });
+
+        // Column selector
+        document.getElementById('ct-columns').addEventListener('change', (e) => {
+            document.getElementById('panels-grid').style.gridTemplateColumns = `repeat(${e.target.value}, 1fr)`;
+        });
+
+        // Settings modal
+        const modal = document.getElementById('settings-modal');
+        document.getElementById('ct-settings-btn').addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        document.getElementById('save-modal-btn').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Fullscreen toggle
+        document.getElementById('ct-fullscreen-btn').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Initial render
+        renderGrid(12);
+    </script>
 </body>
 </html>
 """
 
 @app.route('/', methods=['GET'])
+@app.route('/gui', methods=['GET'])
 def index():
-    if 'text/html' in request.headers.get('Accept', '') or request.args.get('gui') == '1':
-        return render_template_string(DASHBOARD_HTML, frames_count=len(CAPTCHA_FRAMES), host=request.host_url)
+    if 'text/html' in request.headers.get('Accept', '') or request.args.get('gui') == '1' or not request.is_json:
+        return render_template_string(PURE_SOLVER_HTML)
     return jsonify({
         "status": "online",
         "service": "CaptchaTyper Proxy Server",
