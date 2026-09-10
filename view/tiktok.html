@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+        </script>
+    </head>
+    <body>
+        <div id="captcha_container"></div>
+        <script
+            src="https://sf16-scmcdn-va.ibytedtos.com/obj/static-us/secsdk-captcha/va/2.26.17/captcha.js"
+            onerror="scriptLoadError()"
+            onabort="scriptLoadError()"
+        ></script>
+        <script>
+            window.verifySDK.initVerifyOptions(${verifyOptions})
+            const host = '${Host}' ?? undefined
+            window.verifySDK.autoRender({
+                captchaOptions: {
+                    closeCb: () => console.log('captchaOptions.closeCb'),
+                    successCb: () => console.log("successCb"),
+                    errorCb: (e) => console.log('errorCb', e),
+                    initErrorCb: (e) => console.log('initErrorCb', e),
+                    host
+                },
+            secondVerifyWebOptions: {
+                callBack: () => console.log('secondVerifyWebOptions.callBack'),
+                closeCallBack: () => console.log('secondVerifyWebOptions.closeCallBack')
+            },
+            verify_data: ${Data}
+            })
+
+            setInterval(() => {
+                if( document.querySelector('.verify-bar-close'))
+                {
+                    console.log('frame-onload')
+                }
+            },1000)
+        </script>
+    </body>
+</html>

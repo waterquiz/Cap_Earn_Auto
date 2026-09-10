@@ -1,0 +1,262 @@
+<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="./"><title>CaptchaTyper Panel</title><link href="./css/app.8df9c6a7.css" rel="stylesheet"><link href="./css/chunk-vendors.8a3cab23.css" rel="stylesheet"><style>body {
+        margin: 0;
+        padding: 0;
+        background-color: #0f0f1b;
+        color: #d1d5db;
+        font-family: 'Exo 2', sans-serif, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+      }</style></head><body><noscript><strong>We're sorry but captchatypers-or doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"></div><script>// Get panel ID from global variable set by inject script or preload
+        const panelId = window.CT_PANEL_ID || 'unknown';
+        console.log(`[CT Panel ${panelId}] Initializing...`);
+        console.log(`[CT Panel ${panelId}] Settings path:`, window.CT_SETTINGS_PATH || 'not yet set');
+        
+        // Set webpack public path to current directory
+        const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        window.__webpack_public_path__ = currentPath;
+        console.log(`[CT Panel ${panelId}] Webpack public path set to:`, window.__webpack_public_path__);
+        
+        // Debug logging
+        console.log(`[CT Panel ${panelId}] Starting to load...`);
+        console.log(`[CT Panel ${panelId}] Location:`, window.location.href);
+        
+        // Log storage isolation
+        console.log(`[CT Panel ${panelId}] LocalStorage key count:`, Object.keys(localStorage).length);
+        console.log(`[CT Panel ${panelId}] SessionStorage key count:`, Object.keys(sessionStorage).length);
+        
+        // Error handling
+        window.addEventListener('error', (e) => {
+            console.error(`[CT Panel ${panelId}] Error:`, e.error);
+            console.error(`[CT Panel ${panelId}] Message:`, e.message);
+            console.error(`[CT Panel ${panelId}] Filename:`, e.filename);
+            console.error(`[CT Panel ${panelId}] Line:`, e.lineno);
+            
+            // Try to diagnose asset loading issues
+            if (e.filename && (e.filename.includes('logo') || e.filename.includes('loader'))) {
+                console.error(`[CT Panel ${panelId}] Asset loading issue detected:`, e.filename);
+                console.error(`[CT Panel ${panelId}] Current public path:`, window.__webpack_public_path__);
+                console.error(`[CT Panel ${panelId}] Current location:`, window.location.href);
+            }
+        }, true);
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error(`[CT Panel ${panelId}] Unhandled rejection:`, e.reason);
+        });
+        
+        // Monitor Vue.js mounting
+        let checkVueInterval = setInterval(() => {
+            if (window.Vue) {
+                console.log(`[CT Panel ${panelId}] ✅ Vue.js loaded!`);
+            }
+            
+            const appElement = document.getElementById('app');
+            if (appElement) {
+                if (appElement.innerHTML.trim() !== '') {
+                    console.log(`[CT Panel ${panelId}] ✅ Vue app mounted! Content length:`, appElement.innerHTML.length);
+                    console.log(`[CT Panel ${panelId}] ✅ Panel is ready!`);
+                    clearInterval(checkVueInterval);
+                } else {
+                    console.log(`[CT Panel ${panelId}] ⏳ Waiting for Vue app to mount...`);
+                }
+            }
+        }, 500);
+        
+        // Stop checking after 10 seconds
+        setTimeout(() => {
+            clearInterval(checkVueInterval);
+            const appElement = document.getElementById('app');
+            if (appElement && appElement.innerHTML.trim() === '') {
+                console.error(`[CT Panel ${panelId}] ❌ Vue app failed to mount after 10 seconds!`);
+                console.error(`[CT Panel ${panelId}] App element exists but is empty`);
+        }, 10000);</script>
+<script>
+(function() {
+    // 1. Define custom webview element if we are not running in Electron (where customElements.get('webview') is already defined)
+    if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
+        class WebViewElement extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                shadow.appendChild(iframe);
+                this._iframe = iframe;
+                
+                // Forward events from inner iframe to parent webview element
+                const self = this;
+                ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
+                    iframe.addEventListener(evtName, function(e) {
+                        const newEvt = new Event(evtName);
+                        // Copy properties
+                        for (let k in e) {
+                            try { newEvt[k] = e[k]; } catch(err){}
+                        }
+                        self.dispatchEvent(newEvt);
+                    });
+                });
+            }
+            static get observedAttributes() { return ['src']; }
+            attributeChangedCallback(name, oldValue, newValue) {
+                if (name === 'src' && this._iframe) {
+                    this._iframe.src = newValue;
+                }
+            }
+            get src() {
+                return this._iframe ? this._iframe.src : '';
+            }
+            set src(val) {
+                if (this._iframe) this._iframe.src = val;
+                this.setAttribute('src', val);
+            }
+            get name() {
+                return this._iframe ? this._iframe.name : '';
+            }
+            set name(val) {
+                if (this._iframe) this._iframe.name = val;
+                this.setAttribute('name', val);
+            }
+            loadURL(url, options) {
+                return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
+            }
+            clearStorageData() { return Promise.resolve(); }
+            setProxy() { return Promise.resolve(); }
+            setCookies() { return Promise.resolve(); }
+            getCookies() { return Promise.resolve([]); }
+            setUserAgent() { return Promise.resolve(); }
+        }
+        customElements.define('webview', WebViewElement);
+    }
+
+    if (typeof HTMLIFrameElement !== 'undefined') {
+        var originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+        if (originalSrcDescriptor && originalSrcDescriptor.set) {
+            Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+                get: function() {
+                    return originalSrcDescriptor.get.call(this);
+                },
+                set: function(val) {
+                    originalSrcDescriptor.set.call(this, val);
+                    var iframe = this;
+                    setTimeout(function() {
+                        iframe.dispatchEvent(new Event('did-navigate'));
+                        iframe.dispatchEvent(new Event('did-finish-load'));
+                    }, 50);
+                }
+            });
+        }
+        HTMLIFrameElement.prototype.loadURL = function(url, options) {
+            var iframe = this;
+            var htmlContent = '';
+            
+            if (url.startsWith('data:text/html,')) {
+                htmlContent = decodeURIComponent(url.substring('data:text/html,'.length));
+            } else if (url.startsWith('data:text/html;base64,')) {
+                htmlContent = atob(url.substring('data:text/html;base64,'.length));
+            } else {
+                iframe.src = url;
+                return Promise.resolve();
+            }
+            var baseUrl = (options && options.baseURLForDataURL) ? options.baseURLForDataURL : 'https://worker.captchatypers.com/';
+            var frameId = 'frame_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+            if (!iframe.name) {
+                iframe.name = frameId;
+            }
+            // Synchronous XHR ensures HTML is saved in memory before iframe navigates
+            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || 'http://127.0.0.1:5000').replace(/\/+$/, '');
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', captchaServer + '/store_captcha_frame', false); // Synchronous
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ id: frameId, html: htmlContent, domain: baseUrl }));
+            } catch(e) {
+                console.error('[Sync Store Error]', e);
+            }
+            iframe.src = captchaServer + '/render_captcha_frame?id=' + frameId;
+            setTimeout(function() {
+                var loadedEvt = new Event('console-message');
+                loadedEvt.message = 'frame loaded !';
+                iframe.dispatchEvent(loadedEvt);
+                
+                var loadedEvt2 = new Event('console-message');
+                loadedEvt2.message = 'frame-onload';
+                iframe.dispatchEvent(loadedEvt2);
+                
+                var activeEvt = new Event('console-message');
+                activeEvt.message = 'detect-active';
+                iframe.dispatchEvent(activeEvt);
+                
+                iframe.dispatchEvent(new Event('did-finish-load'));
+                iframe.dispatchEvent(new Event('did-navigate'));
+            }, 100);
+            return Promise.resolve();
+        };
+        HTMLIFrameElement.prototype.clearStorageData = function() { return Promise.resolve(); };
+        HTMLIFrameElement.prototype.setProxy = function() { return Promise.resolve(); };
+        HTMLIFrameElement.prototype.setCookies = function() { return Promise.resolve(); };
+        HTMLIFrameElement.prototype.getCookies = function() { return Promise.resolve([]); };
+        HTMLIFrameElement.prototype.setUserAgent = function() { return Promise.resolve(); };
+    }
+    
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'ctor-console-event') {
+            var msg = event.data.msg;
+            if (msg === 'frame-load-error') {
+                return;
+            }
+            var iframeId = event.data.iframeId;
+            
+            // 1. Dispatch event to standard iframes
+            var iframes = document.querySelectorAll('iframe');
+            iframes.forEach(function(iframe) {
+                if (!iframeId || iframe.name === iframeId || iframes.length === 1) {
+                    var evt = new Event('console-message');
+                    evt.message = msg;
+                    iframe.dispatchEvent(evt);
+                }
+            });
+            
+            // 2. Dispatch event to custom webview elements
+            var webviews = document.querySelectorAll('webview');
+            webviews.forEach(function(webview) {
+                if (webview._iframe && (webview._iframe.name === iframeId || !iframeId || webviews.length === 1)) {
+                    var evt = new Event('console-message');
+                    evt.message = msg;
+                    webview.dispatchEvent(evt);
+                }
+            });
+        }
+    });
+})();
+</script>
+<script type="module" src="./js/chunk-vendors.e53ee92a.js"></script><script type="module" src="./js/app.147dfad4.js"></script><script>// Context Menu for DevTools
+        const { ipcRenderer } = require('electron');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Context menu (right-click)
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                
+                // Send IPC to main process to show context menu
+                ipcRenderer.send('show-ct-panel-context-menu');
+            });
+        });
+        
+        !function() {
+            var e = document
+              , t = e.createElement("script");
+            if (!("noModule"in t) && "onbeforeload"in t) {
+                var n = !1;
+                e.addEventListener("beforeload", function(e) {
+                    if (e.target === t)
+                        n = !0;
+                    else if (!e.target.hasAttribute("nomodule") || !n)
+                        return;
+                    e.preventDefault()
+                }, !0),
+                t.type = "module",
+                t.src = ".",
+                e.head.appendChild(t),
+                t.remove()
+            }
+        }();</script></body></html>

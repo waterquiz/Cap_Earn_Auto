@@ -1,0 +1,45 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script>
+            function mt_verifiedcb(state)  {
+                console.log('token:'+state.verifiedToken);
+            };
+            function jsloaded_callback() {
+                console.log('frame-onload')
+            };
+            function error_callback() {
+                console.log('captcha-load-error')
+            }
+
+            const action = "${Action}"
+
+            var mtcaptchaConfig = {
+                "sitekey": "${SiteKey}",
+                "render": "explicit",     // or "auto"
+                "loadAnimation": "${Invisible}",
+                "renderQueue": [],
+                "verified-callback": "mt_verifiedcb",
+                "jsloaded-callback": "jsloaded_callback",
+                "error-callback": "error_callback"
+            };
+            if(action != "")
+                mtcaptchaConfig.action = action
+
+                var mt_service = document.createElement('script');
+                mt_service.src = 'https://service.mtcaptcha.com/mtcv1/client/mtcaptcha.min.js';
+                document.head.appendChild(mt_service);
+
+                var mt_service2 = document.createElement('script');
+                mt_service2.src = 'https://service2.mtcaptcha.com/mtcv1/client/mtcaptcha2.min.js';
+                document.head.appendChild(mt_service2);
+
+        </script>
+    </head>
+    <body>
+        <div id="someMTCaptchaID"></div>
+        <script>
+            mtcaptchaConfig.renderQueue.push("someMTCaptchaID");
+        </script>
+    </body>
+</html>

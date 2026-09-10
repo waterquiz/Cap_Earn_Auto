@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            var Surl = '';
+            var Publickey = '';
+            var Data = '';
+
+            Surl = '${Surl}';
+            Publickey = '${Publickey}';
+            Data = '${Data}';
+            
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            var loadCaptcha = function()
+            {
+                new FunCaptcha({
+                    public_key:  Publickey,
+                    surl: Surl,
+                    data: Data ? JSON.parse(Data) : null,
+                    target_html: 'anti_bot',
+                    onsuppress: function () {
+                        console.log('on supperss');
+                    },
+                    onshown: function () {
+                        console.log('frame-onload');
+                    },
+                    callback: function (e) {
+                        console.log(`${Token}:${e}`);
+                    }
+                });
+            }
+        </script>
+        <script
+            src="${Surl}/fc/api/?onload=loadCaptcha"
+            onerror="scriptLoadError()"
+            onabort="scriptLoadError()"
+        ></script>
+    </head>
+    <body>
+        <div id="anti_bot"></div>
+    </body>
+</html>

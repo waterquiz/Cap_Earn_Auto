@@ -1,0 +1,436 @@
+/* .icon component */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+/* ==========================================
+Single-colored icons can be modified like so:
+.icon-name {
+  font-size: 32px;
+  color: red;
+}
+========================================== */
+
+.icon-check {
+  width: 1.4287109375em;
+}
+
+.icon-cloud-check {
+  width: 1.5em;
+}
+
+.icon-cloud-arrow-down {
+  width: 1.5em;
+}
+
+/* .visually-hidden component */
+.visually-hidden:not(:focus):not(:active),
+input[type="checkbox"].visually-hidden,
+input[type="radio"].visually-hidden,
+input[type="file"].visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+/* .link component */
+.link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: underline;
+}
+
+.link:hover,
+.link:focus {
+  text-decoration: none;
+}
+
+.link_primary {
+  color: #2486ff;
+}
+
+.link_secondary {
+  color: var(--secondary-color);
+}
+
+.link__prepend {
+  margin-right: 5px;
+}
+
+/* .btn component */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  font: inherit;
+  line-height: 1;
+  text-align: center;
+  justify-content: center;
+  padding: 8px 10px;
+  min-width: 60px;
+  border: 0;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.btn_primary {
+  color: white;
+  background-color: #2486FF;
+}
+
+.btn_success {
+  color: white;
+  background-color: #1AB000;
+}
+
+.btn_secondary {
+  color: white;
+  background-color: #646464;
+}
+
+.btn_light {
+  color: white;
+  background-color: #c6cfe0;
+}
+
+.btn_warning {
+  color: white;
+  background-color: #ff7a00;
+}
+
+.btn_outline_danger {
+  color: #FF6464;
+  box-shadow: inset 0 0 0 1px #F2E9E9;
+  background-color: var(--main-bg-color);
+}
+
+.dark-theme .btn_outline_danger {
+  box-shadow: inset 0 0 0 1px #624444;
+}
+
+.btn_outline_warning {
+  color: #FF7A00;
+  box-shadow: inset 0 0 0 1px #F2EFE9;
+  background-color: var(--main-bg-color);
+}
+
+.dark-theme .btn_outline_warning {
+  box-shadow: inset 0 0 0 1px #625244;
+}
+
+.btn_striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255,255,255,.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255,255,255,.15) 50%,
+    rgba(255,255,255,.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  0% { background-position: 1rem 0; }
+  100% { background-position: 0 0; }
+}
+
+.btn__prepend {
+  margin-right: 10px;
+}
+
+/* .alert component */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 20px;
+  color: var(--alert-color);
+  background-color: var(--alert-bg-color);
+  border-radius: 10px;
+}
+
+.alert_info {
+  --alert-color: #1ab000;
+  --alert-bg-color: #d9f8df;
+}
+
+.alert__icon {
+  flex-shrink: 0;
+  margin-top: 5px;
+  margin-right: 10px;
+}
+
+.dark-theme .alert_info {
+  --alert-color: #1ab000;
+  --alert-bg-color: #435347;
+}
+
+/* .list component */
+.list__item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.list__item:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.list__icon {
+  flex-shrink: 0;
+  margin-top: 5px;
+  margin-right: 10px;
+}
+
+.list__text {
+  margin: 0;
+}
+
+.list__bold {
+  font-weight: 600;
+}
+
+/* .toggle-btn component */
+.toggle-btn__inner {
+  display: inline-flex;
+  padding: 3px;
+  width: 60px;
+  height: 30px;
+  background-color: #c6cfe0;
+  border-radius: 15px;
+  border: 0;
+  cursor: pointer;
+}
+
+.toggle-btn__indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  transition: margin-left 0.5s ease;
+}
+
+.toggle-btn__inner[aria-checked="true"] .toggle-btn__indicator {
+  margin-left: 30px;
+}
+
+.toggle-btn__inner[aria-checked="true"] {
+  background-color: #2486ff;
+}
+
+.toggle-btn__icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* .dropdown component */
+.dropdown {
+  position: relative;
+}
+
+.dropdown_open .dropdown__current {
+  border-color: transparent;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.dropdown_open .dropdown__list {
+  display: block;
+}
+
+.dropdown__current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 10px;
+  width: 60px;
+  height: 30px;
+  background-color: var(--secondary-bg-color);
+  border: 1px solid #c9c9c9;
+  border-radius: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dropdown__list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--secondary-bg-color);
+  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 15px;
+}
+
+.dropdown__item {
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+/* .section-title component */
+.section-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+/* .input-group */
+.input-group__input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  line-height: 20px;
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px #c9c9c9;
+  border: 0;
+  border-radius: 4px;
+}
+
+.input-group__input::placeholder {
+  color: var(--secondary-color);
+}
+
+.dark-theme .input-group__input {
+  color: white;
+}
+
+.input-group__select {
+  appearance: none;
+
+  text-indent: 0.01px;
+  text-overflow: '';
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  display: block;
+  padding: 10px;
+  padding-right: 20px;
+  width: 100%;
+  max-width: 100%;
+
+  font: inherit;
+  line-height: 20px;
+  color: inherit;
+
+  background-color: transparent;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px #c9c9c9;
+  border: 0;
+  cursor: pointer;
+
+  background-repeat: no-repeat;
+  background-position: top 50% right 10px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-size: 1em;
+}
+
+.dark-theme .input-group__select {
+  color: white;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+.input-group__select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-group__select::-ms-expand {
+  display: none;
+}
+
+.input-group__select option {
+  font-weight: 400;
+  /* Needed for windows */
+  color: black;
+}
+
+/* .cabinet-modal */
+.cabinet-modal {
+  margin-bottom: auto;
+  width: 100%;
+  position: relative;
+  padding: 10px 15px 20px;
+  color: var(--main-color);
+  background-color: var(--secondary-bg-color);
+  border-radius: 10px;
+}
+
+.cabinet-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  padding: 5px;
+  border: 0;
+  color: var(--secondary-color);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+/* .loader */
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  border: 3px solid;
+  border-color: #1AB000 transparent #1AB000 transparent;
+  box-sizing: border-box;
+  animation: rotation 2s linear infinite;
+  background-color: transparent;
+}
+
+.loader::after {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  border: 3px solid;
+  border-color: transparent #2486ff transparent #2486ff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: rotationBack 1s linear infinite;
+  transform-origin: center center;
+  background-color: transparent;
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotationBack {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+.yellow_font {
+  color: #FFD37D;
+}

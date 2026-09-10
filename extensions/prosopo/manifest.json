@@ -1,0 +1,17 @@
+{
+  "name": "Prosopo",
+  "version": "1.0",
+  "manifest_version": 3,
+  "description": "Mencari dan mengklik",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

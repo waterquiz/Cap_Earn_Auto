@@ -1,0 +1,37 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <script defer src="https://${ApiServer}/js/api.js" onerror="scriptLoadError()" onabort="scriptLoadError()"></script>
+</head>
+
+<body>
+  <form method="POST">
+    <div id="__xCaptchaDiv" data-sitekey="${SiteKey}" data-callback="callback" data-hash="${HashId}"
+      style="min-height:75px!important"></div>
+  </form>
+
+  <script>
+    window.SERVER_PORT = ${SERVER_PORT};
+    const scriptLoadError = () => {
+      console.log('frame-load-error');
+    };
+
+    function callback(res) {
+      console.log('token:' + res);
+    }
+
+    window.onload = function () {
+      const iv = setInterval(() => {
+        if (window.__xcaptcha) {
+          clearInterval(iv);
+          console.log('frame-onload');
+          __xcaptcha.check();
+        }
+      }, 500)
+    }
+
+  </script>
+</body>
+
+</html>

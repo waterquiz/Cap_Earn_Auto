@@ -1,0 +1,100 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>GeeTest</title>
+  <style>
+    html,
+    body {
+      overflow: hidden !important;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .row {
+      display: flex;
+      justify-content: center;
+      flex-direction: row;
+    }
+  </style>
+  <script>
+    const scriptLoadError = () => {
+      console.log('frame-load-error');
+    };
+    const generateCaptcha = () => {
+      detectActive();
+      if (!initGeetest4)
+        return;
+
+      let captchaId = '';
+
+      captchaId = `${captchaId}`;
+
+      let captchaStatus = document.getElementById('captcha-status-message');
+      captchaStatus.setAttribute('class', 'text-info');
+      captchaStatus.innerHTML = 'Loading Captcha &hellip;<br>';
+      captchaStatus.style.display = "inline";
+      let obj = {
+        captchaId,
+        lang: window.navigator.language.slice(0, 2)
+      };
+      initGeetest4(obj, function (captchaObj) {
+        captchaObj.onReady(function () {
+          window.captcha = captchaId
+          captchaStatus.style.display = 'none';
+          captchaStatus.setAttribute('class', 'text-info');
+          console.log('frame-onload');
+        });
+        captchaObj.appendTo(document.getElementById('captcha-box'));
+        const interval = setInterval(() => {
+          const r = captchaObj.getValidate()
+          if(!r)
+            return
+          clearInterval(interval)
+          console.log('token:' + JSON.stringify(r))
+        })
+      });
+    };
+    const detectActive = () => {
+      const attribKey = 'mt_inj';
+      const btnSelector = '.geetest_btn_click';
+      const boxSelector = '.geetest_slider';
+      setInterval(() => {
+        const btn = document.querySelector(btnSelector);
+        if (btn && !btn.getAttribute(attribKey)) {
+          btn.setAttribute(attribKey, 'true');
+          btn.click(); // Mengaktifkan kembali auto click
+        }
+        const box = document.querySelector(boxSelector);
+        if (box && !box.getAttribute(attribKey)) {
+          console.log('detect-active-trigger')
+          box.setAttribute(attribKey, 'true');
+          box.addEventListener('mousemove', () => {
+            console.log('detect-active');
+          });
+        }
+      }, 1000);
+    };
+  </script>
+</head>
+
+<body>
+  <div class="column">
+    <div class="row">
+      <div id="captcha-box">
+        <span id="captcha-status-message" class="text-info" style="display: none;">Loading Captcha…<br></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://static.geetest.com/v4/gt4.js" onerror="scriptLoadError()" onabort="scriptLoadError()"
+    onload="generateCaptcha()"></script>
+</body>
+
+</html>

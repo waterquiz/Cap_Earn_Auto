@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            var submitCallback = function (response) { document.getElementById('captcha-form').submit(); };
+            
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            var OnRcErrorCallback = () => {
+                console.log('captcha-load-error')
+            };
+            var onloadFunction = function() {
+              console.log('frame-onload')
+              const widgetId = window.smartCaptcha.render(document.getElementById('smart-captcha'), {
+                sitekey: '${SiteKey}',
+                callback: (token) => {
+                  console.log('token:'+token)
+                }
+              });
+            }
+
+            function detectActive() {
+                const attribKey = 'mt_inj';
+                let IsClick = false;
+                let CountImgClick = 0;
+                let IsOnload = false;
+
+                const int = setInterval(function () {
+                    const tx = document.getElementById('g-recaptcha-response');
+                    if (!tx || !tx.value)
+                        return;
+                    console.log('token:' + tx.value);
+                    clearInterval(int);
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body>
+      <div
+        class="smart-captcha"
+        id="smart-captcha"
+        style="position: fixed;left: 0;top:0;"
+      ></div>
+        
+      <script
+        src="https://captcha-api.yandex.ru/captcha.js?render=onload&onload=onloadFunction"
+        onerror="scriptLoadError()"
+        onabort="scriptLoadError()"
+        onload="detectActive()"
+      ></script>
+    </body>
+</html>

@@ -1,0 +1,62 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script type="module" id="procaptcha-script" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+</head>
+
+<body>
+  <div id="procaptcha-container"></div>
+  <div>
+    <p id="errmsg" style="color: rgb(255, 100, 100);" hidden>${FailedText}</p>
+  </div>
+  <script>
+    // A function that will call the render Procaptcha function when the procaptcha script has loaded
+    document.getElementById('procaptcha-script').addEventListener('load', function () {
+      // Define a callback function to be called when the CAPTCHA is verified
+      function onCaptchaVerified(output) {
+        console.log('token: ' + output)
+      }
+
+      function onCaptchaLoadError() {
+        console.log('captcha-load-error')
+      }
+
+      function onBadAnswer() {
+        document.getElementById('errmsg').hidden = false
+      }
+
+      function onReset() {
+        document.getElementById('errmsg').hidden = true
+      }
+
+      // Get the Element using elementId
+      const captchaContainer = document.getElementById("procaptcha-container")
+      var opts = {
+        siteKey: "${SiteKey}",
+        callback: onCaptchaVerified
+        // lang: "${CapLang}"
+      }
+
+      if (window.location.href.includes('pimeyes.com')) {
+        opts['captchaType'] = 'image'
+      }
+
+      // Render the CAPTCHA explicitly on a container with id "procaptcha-container"
+      opts['chalexpired-callback'] = () => console.log('CHALLENGE EXPIRED CALLBACK')
+      opts['error-callback'] = onCaptchaLoadError
+      opts['close-callback'] = () => console.log('CLOSE CALLBACK')
+      opts['open-callback'] = onReset
+      opts['expired-callback'] = () => console.log('EXPIRED CALLBACK')
+      opts['failed-callback'] = onBadAnswer
+      opts['reset-callback'] = () => onReset
+
+
+      window.procaptcha.render(captchaContainer, opts)
+      console.log('frame-onload')
+
+    })
+  </script>
+</body>
+
+</html>

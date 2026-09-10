@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            var OnSubmitHCaptcha = (token) => {
+                console.log(JSON.stringify({
+                    token,
+                    useragent: navigator.userAgent,
+                    respKey: window.hcaptcha.getRespKey()
+                }))
+            };
+            var OnErrorCallback = () => {
+                console.log('frame-load-error');
+            };
+            
+            // Handle WebGPU errors
+            window.addEventListener('error', (event) => {
+                if (event.message && event.message.includes('WebGPU')) {
+                    console.log('WebGPU error detected, continuing with fallback...');
+                }
+            });
+            var hCaptchaLoaded = () => {
+                hcaptcha.render('hcaptcha',{
+                    sitekey: '${SiteKey}',
+                    size: 'invisible'
+                })
+                hcaptcha.execute({
+                    ${rqdata}
+                })
+            };
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            const scriptOnload = async () => {
+                await detectFrame();
+            };
+            const detectFrame = () => {
+                return new Promise(ok => {
+                    const int = setInterval(() => {
+                        const frame  = document.querySelector('iframe');
+                        if(!frame)
+                            return;
+                        clearInterval(int);
+                        ok(frame);
+                    },100);
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <form>
+            <script
+                src="https://${Domain}/1/api.js?onload=hCaptchaLoaded&render=explicit"
+                onerror="scriptLoadError()"
+                onabort="scriptLoadError()"
+                onload="scriptOnload()"
+            ></script>
+            <div
+                class="h-captcha"
+                id="hcaptcha"
+                data-callback="OnSubmitHCaptcha"
+                data-error-callback="OnErrorCallback"
+                style="position: fixed;left: 0;top:0;"
+            >
+            </div>
+        </form>
+    </body>
+</html>

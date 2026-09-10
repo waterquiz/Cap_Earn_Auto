@@ -1,0 +1,95 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+            body{
+                text-align: center;
+                padding: 0;
+                margin: 0;
+            }
+        </style>
+        <title>KeyCaptcha</title>
+        <script>
+            var s_s_c_user_id = '';
+            var s_s_c_session_id = '';
+            var s_s_c_captcha_field_id = '';
+            var s_s_c_submit_button_id = '';
+            var s_s_c_web_server_sign = '';
+            var s_s_c_web_server_sign2 = '';
+
+            s_s_c_user_id = `${s_s_c_user_id}`;
+            s_s_c_session_id = `${s_s_c_session_id}`;
+            s_s_c_captcha_field_id = `${s_s_c_captcha_field_id}`;
+            s_s_c_submit_button_id = `${s_s_c_submit_button_id}`;
+            s_s_c_web_server_sign = `${s_s_c_web_server_sign}`;
+            s_s_c_web_server_sign2 = `${s_s_c_web_server_sign2}`;
+
+            var s_s_c_fload_flag = true;
+            var s_s_c_debugmode=1;
+
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            const detectActive = () => {
+                const attribKey = 'mt_inj';
+                const loaderId = 's_s_c_loading';
+                const blockId = 's_s_c_border';
+                const actFx = () => {
+                    console.log('detect-active');
+                };
+
+                setInterval(() => {
+                    const loader = document.getElementById(loaderId);
+                    if(loader && !loader.getAttribute(attribKey) && loader.style.display == 'none')
+                    {
+                        loader.setAttribute(attribKey,'true');
+                        console.log('frame-onload');
+                        document.body.addEventListener('contextmenu',() => {
+                            document.getElementById('form').querySelector('input[type="submit"]').click();
+                        });
+                    }
+                    const block = document.getElementById(blockId);
+                    if(block && !block.getAttribute(attribKey))
+                    {
+                        console.log('detect-active-trigger')
+                        block.setAttribute(attribKey,'true');
+                        block.addEventListener('mousedown',actFx);
+                        block.addEventListener('mouseup',actFx);
+                    }
+                },1000);
+            };
+
+            const formSubmit = () => {
+                let token = document.querySelector('.field').value;
+                console.log(token);
+                if(token != '1|2|3|4|5')
+                    console.log('token:'+token);
+                else
+                    console.log('captcha-load-error');
+                return false;
+            };
+        </script>
+    </head>
+    <body>
+        <form method="get" id="form" onsubmit="return formSubmit()">
+            <script
+                onerror="scriptLoadError()"
+                onabort="scriptLoadError()"
+                onload="detectActive()"
+                src="https://backs.keycaptcha.com/swfs/cap.js"
+            ></script>
+                <div class="browser-fc">
+                    <input
+                        class="field"
+                        type="hidden"
+                        name="${s_s_c_captcha_field_id}"
+                        id="${s_s_c_captcha_field_id}"
+                        value="inputChange(event)"
+                    />
+                    <br>
+                    <input id="${s_s_c_submit_button_id}" type="submit" value="Done">
+                </div>
+            </form>
+    </body>
+</html>

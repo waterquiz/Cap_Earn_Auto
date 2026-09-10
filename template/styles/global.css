@@ -1,0 +1,77 @@
+:root {
+  /* Font variables */
+  --base-font-family: "Manrope", system-ui, sans-serif;
+  --base-font-size: 14px;
+  --base-line-height: 24px;
+
+  /* Color variables */
+  --main-color: #333333;
+  --secondary-color: #646464;
+  --main-bg-color: #ffffff;
+  --secondary-bg-color: #f8f9fb;
+}
+
+.dark-theme {
+  --main-color: #ffffff;
+  --secondary-color: #969696;
+  --main-bg-color: #0f0f0f;
+  --secondary-bg-color: #333333;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul[class],
+ol[class] {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: var(--base-font-family);
+  font-size: var(--base-font-size);
+  line-height: var(--base-line-height);
+  font-weight: 400;
+  overflow-wrap: break-word;
+  color: var(--main-color);
+  text-rendering: optimizeSpeed;
+  background-color: var(--main-bg-color);
+}
+
+.page_bg_secondary {
+  background-color: var(--secondary-bg-color);
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.dark-theme .page {
+  font-weight: 350;
+}

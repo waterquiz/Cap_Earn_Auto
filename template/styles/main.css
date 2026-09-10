@@ -1,0 +1,1419 @@
+:root {
+  --bg-color: #0f0f1b;
+  --title-bar-color: #0a0a14;
+  --primary-glow: #00ffff;
+  --border-color: rgba(0, 255, 255, 0.2);
+  --text-color: #d1d5db;
+  --text-muted: #8892b0;
+  --input-bg: rgba(255, 255, 255, 0.1);
+}
+body {
+  font-family: 'Exo 2', sans-serif, 'Segoe UI', Tahoma, Geneva, Verdana,
+    sans-serif;
+  margin: 0;
+  padding: 0;
+  /* background-color: transparent; */ /* di ganti dengan */
+  background-color: var(--bg-color); /* perbaikan: Kembalikan warna latar belakang body */
+  color: var(--text-color);
+  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 800px; /* PENTING: Minimum width untuk mencegah layout collapse */
+}
+.main-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+#title-bar {
+  display: grid;
+  /* PERBAIKAN: Grid dengan ukuran yang lebih stabil dan min-width */
+  /* Use auto for flexible sizing that prevents overlap */
+  grid-template-columns: minmax(min-content, auto) minmax(0, 1fr) minmax(min-content, auto);
+  align-items: center;
+  -webkit-app-region: drag;
+  background-color: transparent;
+  height: 50px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  min-width: 800px; /* Minimum width untuk mencegah collapse */
+  overflow: hidden; /* Cegah overflow */
+  gap: 10px; /* Gap antar kolom untuk mencegah overlap */
+  /* NEW: Use container queries for better adaptation */
+  container-type: inline-size;
+}
+
+/* BARU: Tambahkan style ini di mana saja di dalam main.css */
+.center-container {
+  display: flex;
+  justify-content: center; /* Pusatkan item secara horizontal */
+  align-items: center;    /* Sejajarkan item secara vertikal */
+  gap: 12px;              /* Kurangi jarak agar lebih compact */
+  -webkit-app-region: drag; /* Pastikan area ini bisa di-drag */
+  flex-wrap: nowrap;      /* Jangan wrap, paksa horizontal */
+  overflow: hidden;       /* Cegah overflow */
+  min-width: 0;           /* Izinkan shrink */
+  flex-shrink: 1;         /* Bisa mengecil jika perlu */
+  max-width: 100%;        /* Tidak melebihi container */
+  position: relative;     /* For pseudo-elements positioning */
+}
+.logo-container {
+  display: flex;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0; /* Logo tidak boleh mengecil */
+  white-space: nowrap; /* Teks tidak wrap */
+  overflow: hidden; /* Cegah overflow */
+  max-width: 100%; /* Tidak melebihi container */
+  /* HAPUS pointer-events: none; agar tetap bisa drag */
+  /* pointer-events: none; <- DIHAPUS */
+}
+
+.logo-container img {
+  width: 28px; /* Lebih kecil */
+  height: 28px;
+  margin-right: 8px; /* Kurangi margin */
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0; /* Jangan mengecil */
+  /* HAPUS pointer-events: none; agar tetap bisa drag */
+  /* pointer-events: none; <- DIHAPUS */
+}
+
+.logo-container h1 {
+  font-size: 18px; /* Lebih kecil */
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--primary-glow);
+  user-select: none;
+  -webkit-user-select: none;
+  margin: 0; /* Hapus margin default */
+  /* HAPUS pointer-events: none; agar tetap bisa drag */
+  /* pointer-events: none; <- DIHAPUS */
+}
+.logo-container .king-text {
+  color: var(--primary-glow);
+}
+
+.version-tag {
+  font-size: 9px; /* Lebih kecil */
+  color: var(--text-muted);
+  font-weight: normal;
+  opacity: 0.7;
+  margin-left: 6px; /* Kurangi margin */
+  vertical-align: super;
+}
+
+/* App Switch Button Styles */
+.app-switch-container {
+  margin-left: 10px; /* Kurangi margin */
+  -webkit-app-region: no-drag;
+  flex-shrink: 0; /* Jangan mengecil */
+}
+
+.app-switch-btn {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.2));
+  border: 1px solid var(--primary-glow);
+  border-radius: 16px; /* Lebih kecil */
+  padding: 4px 12px; /* Kurangi padding */
+  color: var(--primary-glow);
+  font-size: 10px; /* Lebih kecil */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap; /* Jangan wrap */
+}
+
+.app-switch-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.3));
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.app-switch-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+.controls-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap; /* Jangan wrap, tetap horizontal */
+  /* HAPUS no-drag dari sini, biarkan inherit dari parent */
+  position: relative; /* Untuk positioning yang lebih baik */
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+}
+.settings-group {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Kurangi gap */
+  -webkit-app-region: no-drag; /* HANYA ELEMEN INTERAKTIF YANG NO-DRAG */
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+}
+.settings-group label {
+  font-size: 12px; /* Lebih kecil */
+  color: var(--text-muted);
+  white-space: nowrap; /* Jangan wrap */
+  flex-shrink: 0; /* Label jangan mengecil */
+}
+.settings-group input[type='number'],
+.settings-group input[type='range'] {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 4px;
+  padding: 3px 6px; /* Kurangi padding */
+  width: 45px; /* Lebih kecil */
+  text-align: center;
+  font-size: 12px; /* Lebih kecil */
+  flex-shrink: 0; /* Jangan mengecil */
+}
+.settings-group input[type='range'] {
+  padding: 0;
+  width: 60px; /* Lebih kecil */
+}
+.settings-group button {
+  background-color: var(--primary-glow);
+  color: var(--title-bar-color);
+  border: none;
+  border-radius: 4px;
+  padding: 3px 10px; /* Kurangi padding */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 11px; /* Lebih kecil */
+  white-space: nowrap; /* Jangan wrap */
+  flex-shrink: 0; /* Jangan mengecil */
+}
+.settings-group button:hover {
+  opacity: 0.9;
+}
+
+/* Area kosong di tengah header tetap bisa drag */
+.controls-container::before,
+.controls-container::after {
+  content: "";
+  flex: 1;
+  -webkit-app-region: drag;
+}
+/* Container tombol kanan */
+.window-actions-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px; /* Kurangi gap */
+  -webkit-app-region: no-drag; /* HANYA TOMBOL YANG TIDAK BISA DRAG */
+  flex-shrink: 0; /* Jangan mengecil */
+  white-space: nowrap; /* Jangan wrap */
+  overflow: hidden; /* Cegah overflow */
+  max-width: 100%; /* Tidak melebihi container */
+}
+.window-controls {
+  display: flex;
+  -webkit-app-region: no-drag; /* PASTIKAN TOMBOL WINDOW TIDAK BISA DRAG */
+}
+.control-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px; /* Lebih kecil */
+  padding: 4px 10px; /* Kurangi padding */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0; /* Jangan mengecil */
+}
+.control-btn:hover {
+  color: var(--primary-glow);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.scroll-controls {
+  display: flex;
+  gap: 3px; /* Kurangi gap */
+  flex-shrink: 0; /* Jangan mengecil */
+}
+span[contenteditable='true'] {
+  cursor: text;
+  padding: 2px 5px;
+  border-radius: 3px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+span[contenteditable='true']:focus {
+  background-color: var(--input-bg);
+  box-shadow: 0 0 5px var(--primary-glow);
+  text-shadow: 0 0 5px var(--primary-glow);
+}
+.webview-panel {
+  -webkit-app-region: no-drag;
+  border: none;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: var(--bg-color); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted); 
+}
+webview {
+  -webkit-app-region: no-drag;
+  width: 100%;
+  height: 100%;
+}
+.hide-on-unmaximized {
+  display: flex;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background-color: #1e1e2f;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  min-width: 500px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.modal-content h2 {
+  margin-top: 0;
+  color: var(--primary-glow);
+}
+#restart-all-btn {
+  cursor: pointer;
+}
+.control-btn:hover {
+  color: var(--primary-glow);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* BARU: Style untuk tombol yang dinonaktifkan */
+.control-btn:disabled {
+  color: #555; /* Warna abu-abu untuk menunjukkan nonaktif */
+  cursor: not-allowed; /* Ubah kursor */
+  background-color: transparent; /* Hapus efek hover */
+}
+.control-btn:disabled:hover {
+    color: #555; /* Pastikan warna tidak berubah saat hover */
+}
+
+.scroll-controls {
+  display: flex;
+  gap: 3px; /* Kurangi gap */
+  flex-shrink: 0; /* Jangan mengecil */
+}
+
+.balance-container {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Kurangi jarak */
+  color: #fff;
+  font-size: 0.95em; /* Lebih kecil agar hemat ruang */
+  font-weight: bold;
+  margin-left: 10px; /* Kurangi margin */
+  padding: 0 10px; /* Kurangi padding */
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+  white-space: nowrap; /* Jangan wrap */
+}
+
+.balance-container .fa-wallet {
+  color: #4caf50; /* Warna hijau untuk ikon dompet */
+  flex-shrink: 0; /* Jangan mengecil */
+}
+
+.balance-separator {
+  color: var(--text-muted);
+  opacity: 0.5;
+  margin: 0 4px; /* Jarak separator */
+}
+
+.expiration-container {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Kurangi jarak */
+  color: var(--text-muted);
+  font-size: 0.9em; /* Lebih kecil agar hemat ruang */
+  font-weight: normal;
+  padding: 0 10px; /* Kurangi padding */
+  border-left: 1px solid #333;
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+  white-space: nowrap; /* Jangan wrap */
+}
+
+.expiration-container .fa-hourglass-half {
+  color: #ffc107; /* Warna kuning amber untuk ikon timer */
+}
+
+/* Style untuk saat waktu hampir habis */
+.expiration-container.warning {
+    color: #ff4757; /* Warna merah */
+    font-weight: bold;
+}
+.expiration-container.warning .fa-hourglass-half {
+    color: #ff4757;
+}
+
+/* Style untuk Timer Kedaluwarsa */
+.timer-display {
+  display: flex;
+  align-items: baseline; /* Rata bawah agar label sejajar */
+  gap: 3px; /* Kurangi jarak */
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+}
+
+.timer-segment {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px; /* Kurangi jarak */
+  flex-shrink: 1; /* Bisa mengecil */
+}
+
+.timer-number {
+  font-size: 0.95em; /* Lebih kecil */
+  font-weight: bold;
+  color: var(--text-color);
+  line-height: 1;
+}
+
+.timer-label {
+  font-size: 0.65em; /* Lebih kecil */
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: normal;
+  margin-left: 1px; /* Kurangi margin */
+}
+
+.timer-separator {
+  font-weight: bold;
+  color: var(--primary-glow);
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.5; }
+}
+
+/* Style untuk mode peringatan (waktu hampir habis) */
+.expiration-container.warning .timer-number,
+.expiration-container.warning .timer-label {
+    color: #ff4757; /* Warna merah */
+}
+
+.expiration-container.warning .timer-separator {
+    color: #ff4757;
+    animation: none; /* Matikan kedip saat warning */
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Daily Task Container Styles */
+.daily-task-container {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Kurangi jarak */
+  color: var(--text-color);
+  font-size: 0.85em; /* Lebih kecil agar hemat ruang */
+  padding: 0 10px; /* Kurangi padding */
+  border-left: 1px solid #333;
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+  white-space: nowrap; /* Jangan wrap */
+}
+
+.daily-task-container .fa-video {
+  color: #ff6b6b;
+}
+
+.daily-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Kurangi jarak */
+  flex-shrink: 1; /* Bisa mengecil */
+  min-width: 0; /* Izinkan shrink */
+}
+
+.streak-count {
+  font-size: 0.8em; /* Lebih kecil */
+  color: var(--primary-glow);
+  font-weight: bold;
+  min-width: 50px; /* Lebih kecil */
+  flex-shrink: 0; /* Jangan mengecil */
+}
+
+.progress-bar {
+  width: 100px; /* Lebih kecil agar hemat ruang */
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  flex-shrink: 1; /* Bisa mengecil jika perlu */
+  min-width: 60px; /* Minimum width */
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffff, #00d4ff);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.upload-proof-btn {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.3));
+  border: 1px solid #ff6b6b;
+  border-radius: 4px;
+  padding: 5px 10px; /* Kurangi padding */
+  color: #ff6b6b;
+  font-size: 10px; /* Lebih kecil */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Kurangi gap */
+  -webkit-app-region: no-drag;
+  white-space: nowrap;
+  flex-shrink: 0; /* Jangan mengecil */
+}
+
+.upload-proof-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.4));
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+  transform: translateY(-1px);
+}
+
+.upload-proof-btn:active {
+  transform: translateY(0);
+}
+
+.upload-proof-btn.completed {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.3));
+  border-color: #4caf50;
+  color: #4caf50;
+  cursor: pointer; /* Still clickable to view guide */
+}
+
+.upload-proof-btn.completed:hover {
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
+/* Admin Button Special Style */
+.admin-btn {
+  color: #ffd700 !important;
+  transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+  color: #ffed4e !important;
+  background-color: rgba(255, 215, 0, 0.1) !important;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Panel Controls Group - Tombol kontrol massal panel */
+.panel-controls-group {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 1px;
+  background: rgba(0, 255, 255, 0.03);
+}
+
+.panel-controls-group .control-btn {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.panel-controls-group .control-btn .btn-label {
+  font-size: 9px;
+  margin-left: 3px;
+  opacity: 0.8;
+}
+
+.panel-ctrl-next:hover {
+  color: var(--primary-glow) !important;
+  background: rgba(0, 255, 255, 0.15) !important;
+}
+
+.panel-ctrl-start:hover {
+  color: #4caf50 !important;
+  background: rgba(76, 175, 80, 0.15) !important;
+}
+
+.panel-ctrl-stop:hover {
+  color: #ff4757 !important;
+  background: rgba(255, 71, 87, 0.15) !important;
+}
+
+.panel-ctrl-close:hover {
+  color: #ffc107 !important;
+  background: rgba(255, 193, 7, 0.15) !important;
+}
+
+.panel-ctrl-close.active-warning {
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  animation: warningPulse 2s infinite;
+}
+
+@keyframes warningPulse {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 8px rgba(255, 193, 7, 0.4); }
+}
+
+.panel-controls-group .control-btn:active {
+  transform: scale(0.92);
+}
+
+/* Auto Combo Button Styles */
+.panel-ctrl-combo {
+  color: #ffa502;
+}
+
+.panel-ctrl-combo:hover {
+  color: #ffa502 !important;
+  background: rgba(255, 165, 2, 0.15) !important;
+}
+
+.panel-ctrl-combo.combo-running {
+  color: #ffa502;
+  border: 1px solid rgba(255, 165, 2, 0.4);
+  animation: comboPulse 1.5s infinite;
+}
+
+.panel-ctrl-combo.combo-running:disabled {
+  color: #ffa502 !important;
+  cursor: wait;
+}
+
+@keyframes comboPulse {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
+}
+
+/* ===== RESPONSIVE DESIGN: Prevent Overlap pada Window Kecil ===== */
+
+/* NEW: Improved responsive breakpoints for smoother adaptation */
+@media (max-width: 1400px) {
+  /* Start reducing sizes and spacing */
+  .center-container {
+    gap: 10px;
+  }
+  
+  .logo-container h1 {
+    font-size: 17px;
+  }
+  
+  .logo-container img {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .progress-bar {
+    width: 90px;
+  }
+  
+  .balance-container,
+  .expiration-container,
+  .daily-task-container {
+    padding: 0 8px;
+    gap: 5px;
+    font-size: 0.9em;
+  }
+}
+
+/* Media Query untuk window yang lebih kecil */
+@media (max-width: 1200px) {
+  /* Sembunyikan beberapa elemen yang tidak terlalu penting */
+  .version-tag {
+    display: inline-block; /* Show version tag */
+  }
+  
+  .app-switch-container {
+    display: block; /* Show app switch button */
+  }
+  
+  /* Lebih compact lagi */
+  .center-container {
+    gap: 8px;
+  }
+  
+  .balance-container,
+  .expiration-container,
+  .daily-task-container {
+    padding: 0 8px;
+    gap: 4px;
+  }
+  
+  .progress-bar {
+    width: 80px;
+    min-width: 50px;
+  }
+  
+  .streak-count {
+    min-width: 40px;
+  }
+  
+  /* Make window actions more compact */
+  .window-actions-container {
+    gap: 3px;
+  }
+  
+  .control-btn {
+    padding: 3px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 1000px) {
+  /* Lebih agresif: sembunyikan daily task */
+  .daily-task-container {
+    display: none !important;
+  }
+  
+  /* Font lebih kecil lagi */
+  .logo-container h1 {
+    font-size: 16px;
+  }
+  
+  .logo-container img {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+  
+  .balance-container {
+    font-size: 0.85em;
+  }
+  
+  .expiration-container {
+    font-size: 0.8em;
+  }
+  
+  /* Kurangi padding header */
+  #title-bar {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 900px) {
+  /* Sangat compact: sembunyikan balance IDR, hanya tampilkan USD */
+  .balance-separator {
+    display: none;
+  }
+  
+  #total-balance-display-idr {
+    display: none;
+  }
+  
+  /* Timer lebih kecil */
+  .timer-number {
+    font-size: 0.85em;
+  }
+  
+  .timer-label {
+    font-size: 0.6em;
+  }
+}
+
+@media (max-width: 850px) {
+  /* Ekstrem compact mode */
+  .balance-container {
+    display: none !important;
+  }
+  
+  .settings-group label {
+    display: none; /* Sembunyikan label "Panels:" */
+  }
+  
+  .settings-group {
+    gap: 4px;
+  }
+  
+  .settings-group input[type='number'] {
+    width: 40px;
+  }
+  
+  .settings-group button {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+  
+  /* Kurangi gap di title bar */
+  #title-bar {
+    gap: 5px;
+    padding: 0 5px;
+  }
+  
+  .center-container {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 800px) {
+  /* Ultra compact mode - untuk window di bawah min-width */
+  #title-bar {
+    min-width: unset; /* Lepas min-width */
+    gap: 5px;
+    padding: 0 5px;
+    grid-template-columns: auto 1fr auto; /* Simplified grid */
+  }
+  
+  body {
+    min-width: unset; /* Lepas min-width */
+  }
+  
+  .logo-container h1 {
+    font-size: 14px;
+  }
+  
+  .logo-container img {
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
+  }
+  
+  .expiration-container {
+    padding: 0 5px;
+  }
+  
+  /* Hide scroll controls on very small screens */
+  .scroll-controls {
+    display: none !important;
+  }
+  
+  /* Hide advanced settings button */
+  #advanced-settings-btn {
+    display: none !important;
+  }
+  
+  .control-btn {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
+  
+  /* Make timer ultra compact */
+  .timer-display {
+    gap: 2px;
+  }
+  
+  .timer-number {
+    font-size: 0.8em;
+  }
+  
+  .timer-label {
+    display: none; /* Hide labels, only show numbers */
+  }
+  
+  .timer-separator {
+    font-size: 0.8em;
+  }
+}
+
+/* Overflow protection untuk semua text elements */
+#total-balance-display-usd,
+#total-balance-display-idr,
+#time-left-display,
+#daily-streak {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Additional overflow protection */
+.balance-container span,
+.expiration-container span,
+.daily-task-container span,
+.logo-container h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure all containers have proper overflow handling */
+.balance-container,
+.expiration-container,
+.daily-task-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 700px) {
+  /* Minimal mode - hanya essentials */
+  .expiration-container {
+    display: none !important;
+  }
+  
+  .settings-group button {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+  
+  .settings-group input[type='number'] {
+    width: 35px;
+    padding: 2px 4px;
+    font-size: 11px;
+  }
+  
+  #title-bar {
+    height: 45px; /* Reduce height */
+    gap: 3px;
+    padding: 0 3px;
+  }
+  
+  .logo-container h1 {
+    font-size: 12px;
+  }
+  
+  .logo-container img {
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+  }
+  
+  .control-btn {
+    padding: 2px 4px;
+    font-size: 11px;
+  }
+}
+
+/* ===== VISIBILITY TOGGLE MENU STYLES ===== */
+.toggle-btn {
+  position: relative;
+}
+
+.toggle-btn:hover {
+  color: var(--primary-glow) !important;
+  background-color: rgba(0, 255, 255, 0.1) !important;
+}
+
+.visibility-menu {
+  position: fixed;
+  top: 60px;
+  right: 10px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid var(--primary-glow);
+  border-radius: 8px;
+  padding: 0;
+  min-width: 420px;
+  max-width: 500px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 255, 255, 0.3);
+  z-index: 9999;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+}
+
+/* Scrollbar for menu */
+.visibility-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.visibility-menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.visibility-menu::-webkit-scrollbar-thumb {
+  background: var(--primary-glow);
+  border-radius: 4px;
+}
+
+.visibility-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.8);
+}
+
+.visibility-menu.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+.visibility-menu.hidden {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  pointer-events: none;
+}
+
+.visibility-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(0, 255, 255, 0.05);
+  border-radius: 8px 8px 0 0;
+}
+
+.visibility-menu-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--primary-glow);
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.close-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px 8px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.close-menu-btn:hover {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+  transform: rotate(90deg);
+}
+
+/* Status Summary Section */
+.visibility-status-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 15px 20px;
+  background: rgba(0, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.status-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.visible-column .status-header {
+  color: var(--primary-glow);
+}
+
+.hidden-column .status-header {
+  color: #ff6b6b;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.status-header i {
+  font-size: 14px;
+}
+
+.status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.status-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.status-list li:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(3px);
+}
+
+.visible-column .status-list li {
+  border-left: 2px solid var(--primary-glow);
+}
+
+.hidden-column .status-list li {
+  border-left: 2px solid #ff6b6b;
+}
+
+.status-dot {
+  font-size: 6px;
+  color: inherit;
+}
+
+.visible-column .status-dot {
+  color: var(--primary-glow);
+}
+
+.hidden-column .status-dot {
+  color: #ff6b6b;
+}
+
+.empty-message {
+  color: var(--text-muted);
+  font-style: italic;
+  opacity: 0.7;
+  border-left: 2px solid var(--text-muted) !important;
+}
+
+.empty-message i {
+  font-size: 10px;
+}
+
+/* Divider between sections */
+.visibility-menu-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(0, 255, 255, 0.3),
+    transparent
+  );
+  margin: 0;
+}
+
+/* Section title for toggle area */
+.visibility-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--primary-glow);
+  margin-bottom: 10px;
+  padding: 10px 0 5px 0;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.visibility-section-title i {
+  font-size: 14px;
+}
+
+.visibility-menu-content {
+  padding: 15px 20px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for menu */
+.visibility-menu-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.visibility-menu-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.visibility-menu-content::-webkit-scrollbar-thumb {
+  background: var(--primary-glow);
+  border-radius: 4px;
+}
+
+.visibility-menu-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 255, 0.8);
+}
+
+.visibility-option {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.visibility-option:hover {
+  background: rgba(0, 255, 255, 0.05);
+  transform: translateX(5px);
+}
+
+.visibility-option label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.visibility-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  cursor: pointer;
+  accent-color: var(--primary-glow);
+  flex-shrink: 0;
+}
+
+.visibility-option span {
+  color: var(--text-color);
+  font-size: 14px;
+  flex-grow: 1;
+}
+
+.visibility-option input[type="checkbox"]:checked + span {
+  color: var(--primary-glow);
+  font-weight: 500;
+}
+
+.visibility-menu-footer {
+  padding: 15px 20px;
+  border-top: 1px solid rgba(0, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 255, 255, 0.02);
+  border-radius: 0 0 8px 8px;
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.3));
+  border: 1px solid #ff6b6b;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: #ff6b6b;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reset-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.4));
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+  transform: translateY(-2px);
+}
+
+.reset-btn:active {
+  transform: translateY(0);
+}
+
+.info-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.info-text i {
+  color: var(--primary-glow);
+}
+
+/* Animation for menu appearance */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.visibility-menu.visible {
+  animation: slideInDown 0.3s ease;
+}
+
+/* Responsive adjustments for visibility menu */
+@media (max-width: 1000px) {
+  .visibility-menu {
+    min-width: 380px;
+    max-width: 450px;
+  }
+  
+  .visibility-status-summary {
+    padding: 12px 15px;
+    gap: 8px;
+  }
+  
+  .status-list {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 800px) {
+  .visibility-menu {
+    top: 55px;
+    right: 5px;
+    min-width: 320px;
+    max-width: 380px;
+  }
+  
+  .visibility-menu-header {
+    padding: 12px 15px;
+  }
+  
+  .visibility-menu-header h3 {
+    font-size: 14px;
+  }
+  
+  .visibility-status-summary {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 15px;
+  }
+  
+  .status-column {
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+  
+  .visibility-menu-content {
+    padding: 12px 15px;
+  }
+  
+  .visibility-option {
+    padding: 8px;
+  }
+  
+  .visibility-option span {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 600px) {
+  .visibility-menu {
+    left: 5px;
+    right: 5px;
+    min-width: unset;
+    max-width: unset;
+  }
+  
+  .status-header {
+    font-size: 11px;
+  }
+  
+  .status-list {
+    font-size: 10px;
+  }
+  
+  .status-list li {
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 450px) {
+  .visibility-menu {
+    top: 50px;
+  }
+  
+  .visibility-menu-header h3 {
+    font-size: 12px;
+  }
+  
+  .status-header {
+    font-size: 10px;
+  }
+  
+  .status-list {
+    font-size: 9px;
+  }
+  
+  .visibility-section-title {
+    font-size: 11px;
+  }
+  
+  .visibility-option span {
+    font-size: 11px;
+  }
+}
+
+/* Ensure visibility-hidden class properly hides elements */
+.visibility-hidden {
+  display: none !important;
+}
+
+/* Add subtle glow to toggle button when menu is open */
+.toggle-btn.active {
+  color: var(--primary-glow);
+  background-color: rgba(0, 255, 255, 0.15);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Overflow hint - pulse animation to indicate user should use visibility toggle */
+.toggle-btn.overflow-hint {
+  animation: pulseHint 2s infinite;
+}
+
+@keyframes pulseHint {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(255, 215, 0, 0.7);
+    background-color: transparent;
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    background-color: rgba(255, 215, 0, 0.1);
+  }
+}
+
+/* Stop hint animation when menu is active */
+.toggle-btn.active.overflow-hint {
+  animation: none;
+}
+
+/* NEW: Add visual overflow indicator on center container */
+.center-container.overflowing::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.center-container.overflowing::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+  pointer-events: none;
+  z-index: 1;
+}

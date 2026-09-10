@@ -1,0 +1,370 @@
+/* =====================================================
+   CaptchaKing Login - Lightweight Modern Design 2026
+   Ringan, Clean, Profesional (Optimized for Low-Spec)
+   ===================================================== */
+
+/* Import Google Fonts - Inter for clean modern look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* CSS Variables for theme */
+:root {
+    --primary-cyan: #00d4ff;
+    --primary-blue: #0088ff;
+    --bg-dark: #0a0a14;
+    --bg-darker: #050508;
+    --glass-bg: rgba(15, 15, 30, 0.85);
+    --glass-border: rgba(0, 212, 255, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+}
+
+/* Base body - gradient dengan variasi warna yang lebih terlihat */
+body {
+    font-family: 'Inter', 'Exo 2', sans-serif !important;
+    background: 
+        radial-gradient(ellipse at 15% 10%, rgba(0, 150, 200, 0.25) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 90%, rgba(100, 50, 150, 0.2) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(0, 80, 120, 0.12) 0%, transparent 50%),
+        linear-gradient(160deg, #0a0a18 0%, #0f0f1a 40%, #0a0a15 70%, #080812 100%) !important;
+    min-height: 100vh !important;
+    position: relative;
+    background-attachment: fixed !important;
+    background-color: #0a0a15 !important;
+}
+
+/* Ensure dark background with color */
+body.text-gray-200,
+body.tech-grid {
+    background-color: #0a0a15 !important;
+}
+
+/* Very subtle grid - static, no animation */
+.tech-grid {
+    background-image: 
+        linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px) !important;
+    background-size: 50px 50px !important;
+}
+
+/* Cyber text glow - simple */
+.cyber-glow { 
+    text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+}
+
+/* Modern glass card - NO heavy blur for performance */
+.glass-card {
+    background: linear-gradient(
+        145deg,
+        rgba(20, 20, 40, 0.95) 0%,
+        rgba(15, 15, 30, 0.9) 100%
+    );
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 15px 50px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+/* Simple border glow */
+.cyber-border {
+    border: 1px solid var(--glass-border);
+}
+
+/* Modern input field - simple and clean */
+.input-field {
+    background: rgba(10, 10, 25, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field::placeholder {
+    color: rgba(148, 163, 184, 0.5);
+}
+
+.input-field:hover {
+    border-color: rgba(0, 212, 255, 0.25);
+}
+
+.input-field:focus {
+    border-color: var(--primary-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+    background: rgba(10, 10, 30, 0.95);
+    outline: none;
+}
+
+/* Modern cyber button - minimal animation */
+.btn-cyber {
+    background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--primary-blue) 100%);
+    color: var(--bg-dark);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-cyber:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.35);
+}
+
+.btn-cyber:active {
+    transform: translateY(0);
+}
+
+.btn-cyber:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Title bar styling */
+header#title-bar {
+    background: rgba(10, 10, 20, 0.98);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    height: 50px;
+    -webkit-app-region: drag;
+}
+
+.window-controls { 
+    -webkit-app-region: no-drag; 
+}
+
+/* Language Switcher */
+.lang-btn {
+    -webkit-app-region: no-drag;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+    opacity: 0.8;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.lang-btn.active {
+    opacity: 1;
+    border-color: var(--primary-cyan);
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.control-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 14px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.control-btn:hover { 
+    color: var(--primary-cyan);
+    background: rgba(0, 212, 255, 0.08);
+}
+
+#close-btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+nav a { 
+    -webkit-app-region: no-drag;
+    transition: color 0.15s ease;
+}
+
+nav a:hover {
+    color: var(--primary-cyan);
+}
+
+/* Modern checkbox */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+    background: rgba(10, 10, 25, 0.8);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, var(--primary-cyan), var(--primary-blue));
+    border-color: var(--primary-cyan);
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--bg-dark);
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Links styling */
+a.text-cyan-400 {
+    color: var(--primary-cyan);
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+}
+
+a.text-cyan-400:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* Error/Success messages */
+#error-message,
+#forgot-error-message {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+#forgot-success-message {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+/* Diagnostic panel */
+#machine-id-diagnostic,
+.bg-blue-900 {
+    background: rgba(30, 58, 138, 0.25) !important;
+    border-radius: 10px !important;
+}
+
+/* WhatsApp button - only for actual button, not nav links */
+#registration-prompt a[href*="wa.me"],
+a.whatsapp-btn[href*="wa.me"] {
+    background: linear-gradient(135deg, #25d366, #128c7e) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#registration-prompt a[href*="wa.me"]:hover,
+a.whatsapp-btn[href*="wa.me"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.25);
+}
+
+/* Payment option */
+.payment-option {
+    background: rgba(10, 10, 25, 0.7);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.15s ease;
+}
+
+.payment-option:hover {
+    border-color: rgba(0, 212, 255, 0.25);
+}
+
+.payment-logo {
+    height: 2.5rem;
+    width: auto;
+    flex-shrink: 0;
+}
+
+.qr-code {
+    width: 140px;
+    height: 140px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    margin: 0 auto;
+}
+
+.payment-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.payment-details {
+    font-family: 'Inter', monospace;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    letter-spacing: 1px;
+}
+
+/* Simple spinner - only animation needed */
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Simple fade for sections */
+#forgot-password-section {
+    animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.3);
+    border-radius: 3px;
+}
+
+/* Selection styling */
+::selection {
+    background: rgba(0, 212, 255, 0.25);
+    color: white;
+}
+
+/* Hide blob elements for performance */
+.blob-container,
+.blob {
+    display: none !important;
+}

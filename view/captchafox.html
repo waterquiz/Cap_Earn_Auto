@@ -1,0 +1,25 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script async defer src="https://cdn.captchafox.com/api.js?onload=onCaptchaLoaded"></script>
+  <script>
+    function onCaptchaVerified(output) {
+      console.log('token: ' + output)
+    }
+    function onCaptchaLoadError() {
+      console.log('captcha-load-error')
+    }
+    function onCaptchaLoaded() {
+      console.log('frame-onload')
+    }
+  </script>
+</head>
+
+<body>
+  <div class="captchafox" data-sitekey="${SiteKey}" data-callback="onCaptchaVerified"
+    data-error-callback="onCaptchaLoadError">
+  </div>
+</body>
+
+</html>

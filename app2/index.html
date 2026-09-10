@@ -1,0 +1,968 @@
+<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pure Solver</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="./css/app.8df9c6a7.css" rel="stylesheet"><link href="./css/chunk-vendors.8a3cab23.css" rel="stylesheet"><style>/* CT Header Styles - Consistent with CaptchaKing */
+      :root {
+        --bg-color: #0f0f1b;
+        --title-bar-color: #0a0a14;
+        --primary-glow: #00ffff;
+        --border-color: rgba(0, 255, 255, 0.2);
+        --text-color: #d1d5db;
+        --text-muted: #8892b0;
+        --input-bg: rgba(255, 255, 255, 0.1);
+      }
+
+      #ct-title-bar {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        -webkit-app-region: drag;
+        background-color: var(--title-bar-color);
+        height: 50px;
+        padding: 0 15px;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .ct-logo-container {
+        display: flex;
+        align-items: center;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .ct-logo-container img {
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .ct-logo-container h1 {
+        font-size: 20px;
+        font-weight: bold;
+        text-shadow: 0 0 10px var(--primary-glow);
+        user-select: none;
+        -webkit-user-select: none;
+        color: var(--text-color);
+        margin: 0;
+      }
+
+      .ct-logo-container .typer-text {
+        color: var(--primary-glow);
+      }
+
+      .ct-app-switch-container {
+        margin-left: 15px;
+        -webkit-app-region: no-drag;
+      }
+
+      .ct-app-switch-btn {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.2));
+        border: 1px solid var(--primary-glow);
+        border-radius: 20px;
+        padding: 6px 15px;
+        color: var(--primary-glow);
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .ct-app-switch-btn:hover {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.3));
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        transform: translateY(-1px);
+      }
+
+      .ct-center-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        -webkit-app-region: drag;
+      }
+
+      .ct-controls-container {
+        -webkit-app-region: no-drag;
+      }
+
+      .ct-settings-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ct-settings-group label {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      /* Expiration Timer Styles */
+      .ct-expiration-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.1));
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        -webkit-app-region: no-drag;
+      }
+
+      .ct-expiration-container i {
+        color: var(--primary-glow);
+        font-size: 14px;
+      }
+
+      .ct-timer-display {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-color);
+      }
+
+      /* Daily Task Styles */
+      .ct-daily-task-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.1));
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        -webkit-app-region: no-drag;
+      }
+
+      .ct-daily-task-container i {
+        color: var(--primary-glow);
+        font-size: 14px;
+      }
+
+      .ct-daily-progress {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ct-streak-count {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-color);
+        white-space: nowrap;
+      }
+
+      .ct-progress-bar {
+        width: 60px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .ct-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-glow), #00aaaa);
+        transition: width 0.3s ease;
+      }
+
+      .ct-upload-proof-btn {
+        background: transparent;
+        border: 1px solid var(--primary-glow);
+        color: var(--primary-glow);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+
+      .ct-upload-proof-btn:hover {
+        background: rgba(0, 255, 255, 0.1);
+      }
+
+      .ct-upload-proof-btn.completed {
+        background: rgba(0, 255, 0, 0.2);
+        border-color: #00ff00;
+        color: #00ff00;
+      }
+
+      /* Balance Display */
+      .ct-balance-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.1));
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        -webkit-app-region: no-drag;
+      }
+
+      .ct-balance-container i {
+        color: var(--primary-glow);
+        font-size: 14px;
+      }
+
+      .ct-balance-container span {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-color);
+      }
+
+      .ct-balance-separator {
+        color: var(--text-muted);
+      }
+
+      #ct-panel-count {
+        width: 60px;
+        padding: 5px 10px;
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        color: var(--text-color);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      #ct-panel-count:focus {
+        outline: none;
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+      }
+
+      #ct-create-panels-btn {
+        padding: 6px 12px;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.2));
+        border: 1px solid var(--primary-glow);
+        border-radius: 4px;
+        color: var(--primary-glow);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      #ct-create-panels-btn:hover {
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.3));
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+        transform: translateY(-1px);
+      }
+
+      #ct-create-panels-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: rgba(0, 255, 255, 0.1);
+        transform: none;
+      }
+
+      .ct-window-actions-container {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        -webkit-app-region: no-drag;
+      }
+
+      .ct-control-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 14px;
+        cursor: pointer;
+        padding: 8px 10px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        -webkit-app-region: no-drag;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .ct-control-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-color);
+      }
+
+      #ct-close-btn:hover {
+        background: rgba(255, 59, 48, 0.8);
+        color: white;
+      }
+      
+      #ct-maximize-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .ct-main-content {
+        margin-top: 50px;
+        height: calc(100vh - 50px);
+        overflow: auto;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: 'Exo 2', sans-serif, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+      }
+
+      #ct-scrollbar-container {
+        position: fixed;
+        right: 0;
+        top: 50px;
+        bottom: 0;
+        width: 14px;
+        background: rgba(15, 15, 27, 0.5);
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 999999;
+        user-select: none;
+        display: none;
+      }
+
+      #ct-scrollbar-thumb {
+        position: absolute;
+        top: 0;
+        right: 3px;
+        width: 8px;
+        min-height: 30px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s ease, width 0.2s ease;
+      }
+
+      #ct-scrollbar-thumb:hover, #ct-scrollbar-thumb.active {
+        background: rgba(0, 255, 255, 0.5);
+        width: 10px;
+        right: 2px;
+      }
+    </style></head><body><header id="ct-title-bar"><div class="ct-logo-container"><img src="../template/CK/Logo.png" alt="Pure Solver Logo"><h1>Pure<span class="typer-text"> Solver</span></h1><div class="ct-app-switch-container" style="display: none !important;"><button id="ct-app-switch-btn" class="ct-app-switch-btn" title="Switch to 2captcha"><span id="ct-app-switch-text">2captcha</span></button></div></div><div class="ct-center-container"><div class="ct-controls-container"><div class="ct-settings-group"><label for="ct-panel-count">Panels:</label> <input type="number" id="ct-panel-count" value="2" min="1" max="100"> <button id="ct-create-panels-btn">Set & Relaunch</button></div></div><div id="ct-expiration-container" class="ct-expiration-container" style="display: none !important;"><i class="fas fa-hourglass-half" style="display: none !important;"></i><div id="ct-time-left-display" class="ct-timer-display">Loading...</div></div><div class="ct-daily-task-container" style="display: none !important;"><i class="fas fa-video"></i><div class="ct-daily-progress"><span id="ct-daily-streak" class="ct-streak-count">0 days</span><div class="ct-progress-bar"><div id="ct-daily-progress-fill" class="ct-progress-fill" style="width: 0%"></div></div><button id="ct-upload-proof-btn" class="ct-upload-proof-btn" title="Guide & Upload Video Proof"><i class="fas fa-video"></i> Guide</button></div></div><div class="ct-balance-container" style="display: none !important;"><i class="fas fa-wallet"></i> <span id="ct-total-balance-display-usd">$0.00</span> <span class="ct-balance-separator" style="display: none !important;">|</span> <span id="ct-total-balance-display-idr" style="display: none !important;">Rp 0</span></div></div><div class="ct-window-actions-container"><button id="ct-scroll-up-btn" class="ct-control-btn" title="Scroll Up All Panels" style="display: none !important;"><i class="fas fa-chevron-up"></i></button> <button id="ct-scroll-down-btn" class="ct-control-btn" title="Scroll Down All Panels" style="display: none !important;"><i class="fas fa-chevron-down"></i></button> <button id="ct-settings-btn" class="ct-control-btn" title="CT Settings"><i class="fas fa-cog"></i></button> <button id="ct-minimize-btn" class="ct-control-btn" title="Minimize"><i class="fas fa-window-minimize"></i></button> <button id="ct-maximize-btn" class="ct-control-btn" title="Maximize"><i class="fas fa-window-maximize"></i></button> <button id="ct-close-btn" class="ct-control-btn" title="Close App"><i class="fas fa-times"></i></button></div></header><div id="ct-scrollbar-container"><div id="ct-scrollbar-thumb"></div></div><script>// CT Header Controls and App Switch Functionality
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { ipcRenderer } = require('electron');
+            const fs = require('fs');
+            const path = require('path');
+            
+            console.log('[CT Header] Initializing...');
+            
+            // Load CT app config
+            const ctConfig = await ipcRenderer.invoke('get-ct-config');
+            const ctPanelCountInput = document.getElementById('ct-panel-count');
+            if (ctPanelCountInput && ctConfig) {
+                ctPanelCountInput.value = ctConfig.panels || 2;
+            }
+
+            // Scroll controls
+            const ctScrollUpBtn = document.getElementById('ct-scroll-up-btn');
+            const ctScrollDownBtn = document.getElementById('ct-scroll-down-btn');
+            if (ctScrollUpBtn) {
+                ctScrollUpBtn.addEventListener('click', () => {
+                    ipcRenderer.send('scroll-ct-panels', { deltaY: -250 });
+                });
+            }
+            if (ctScrollDownBtn) {
+                ctScrollDownBtn.addEventListener('click', () => {
+                    ipcRenderer.send('scroll-ct-panels', { deltaY: 250 });
+                });
+            }
+
+            // Initialize Timer and Daily Task System (uses same Firebase account)
+            initializeCTTimer();
+            initializeCTDailyTask();
+            initializeCTBalance();
+            
+            // Panel count controls
+            const ctCreatePanelsBtn = document.getElementById('ct-create-panels-btn');
+            if (ctCreatePanelsBtn && ctPanelCountInput) {
+                ctCreatePanelsBtn.addEventListener('click', () => {
+                    const panels = parseInt(ctPanelCountInput.value);
+                    if (panels >= 1 && panels <= 100) {
+                        ctCreatePanelsBtn.textContent = 'Loading...';
+                        ctCreatePanelsBtn.disabled = true;
+                        ipcRenderer.send('save-and-relaunch-ct-panels', { panels });
+                        
+                        // Re-enable after 3 seconds
+                        setTimeout(() => {
+                            ctCreatePanelsBtn.textContent = 'Set & Relaunch';
+                            ctCreatePanelsBtn.disabled = false;
+                        }, 3000);
+                    } else {
+                        alert('Jumlah panel harus antara 1-100');
+                    }
+                });
+            }
+            
+            // Listen for validation errors
+            ipcRenderer.on('ct-panel-validation-error', (event, data) => {
+                alert(data.message);
+                if (ctCreatePanelsBtn) {
+                    ctCreatePanelsBtn.textContent = 'Set & Relaunch';
+                    ctCreatePanelsBtn.disabled = false;
+                }
+            });
+            
+            // App Switch Button
+            const ctAppSwitchBtn = document.getElementById('ct-app-switch-btn');
+            if (ctAppSwitchBtn) {
+                ctAppSwitchBtn.addEventListener('click', () => {
+                    // Send message to main process to switch back to 2captcha app
+                    ipcRenderer.send('switch-to-main-app');
+                });
+            }
+            
+            // Window Control Buttons
+            const ctMinimizeBtn = document.getElementById('ct-minimize-btn');
+            const ctMaximizeBtn = document.getElementById('ct-maximize-btn');
+            const ctCloseBtn = document.getElementById('ct-close-btn');
+            
+            if (ctMinimizeBtn) {
+                ctMinimizeBtn.addEventListener('click', () => {
+                    ipcRenderer.send('minimize-window');
+                });
+            }
+            
+            if (ctMaximizeBtn) {
+                ctMaximizeBtn.addEventListener('click', () => {
+                    ipcRenderer.send('maximize-window');
+                });
+            }
+            
+            if (ctCloseBtn) {
+                ctCloseBtn.addEventListener('click', () => {
+                    ipcRenderer.send('close-window');
+                });
+            }
+            
+            // Handle double-click on title bar to maximize/restore
+            const titleBar = document.getElementById('ct-title-bar');
+            if (titleBar) {
+                titleBar.addEventListener('dblclick', (e) => {
+                    // Only trigger if double-clicking on header area, not buttons, inputs, or controls
+                    if (!e.target.closest('button') && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('textarea')) {
+                        ipcRenderer.send('maximize-window');
+                    }
+                });
+            }
+            
+            // Update maximize button icon based on window state
+            function updateMaximizeIcon() {
+                if (ctMaximizeBtn) {
+                    ipcRenderer.invoke('is-window-maximized').then((isMaximized) => {
+                        const icon = ctMaximizeBtn.querySelector('i');
+                        if (icon) {
+                            if (isMaximized) {
+                                icon.className = 'fas fa-window-restore';
+                                ctMaximizeBtn.title = 'Restore';
+                            } else {
+                                icon.className = 'fas fa-window-maximize';
+                                ctMaximizeBtn.title = 'Maximize';
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Initial icon state
+            updateMaximizeIcon();
+            
+            // Listen for window state changes
+            ipcRenderer.on('window-maximized', updateMaximizeIcon);
+            ipcRenderer.on('window-unmaximized', updateMaximizeIcon);
+            
+            // Context menu for header (right-click)
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                ipcRenderer.send('show-ct-panel-context-menu');
+            });
+
+            const ctSettingsBtn = document.getElementById('ct-settings-btn');
+            if (ctSettingsBtn) {
+                console.log('[CT Header] Settings button found, adding listener');
+                ctSettingsBtn.addEventListener('click', () => {
+                    console.log('[CT Header] Settings button clicked, sending open-advanced-settings...');
+                    ipcRenderer.send('open-advanced-settings');
+                });
+            } else {
+                console.warn('[CT Header] Settings button NOT found in DOM!');
+            }
+        });
+
+        // CT Timer System (uses same Firebase account)
+        function initializeCTTimer() {
+            console.log('[CT Timer] Initializing timer from Firebase...');
+            const { ipcRenderer } = require('electron');
+            
+            // Request expiration data from main process (same account)
+            ipcRenderer.send('get-expiration-data');
+            
+            // Listen for expiration updates
+            ipcRenderer.on('expiration-update', (event, data) => {
+                console.log('[CT Timer] Received expiration data:', data);
+                updateCTTimerDisplay(data);
+            });
+            
+            // Update timer every second
+            setInterval(() => {
+                const timerEl = document.getElementById('ct-time-left-display');
+                if (timerEl && timerEl.dataset.expirationDate) {
+                    const timeLeft = calculateTimeLeft(timerEl.dataset.expirationDate);
+                    timerEl.textContent = timeLeft;
+                }
+            }, 1000);
+        }
+
+        function updateCTTimerDisplay(data) {
+            const timerEl = document.getElementById('ct-time-left-display');
+            const container = document.getElementById('ct-expiration-container');
+            
+            if (!timerEl || !container) return;
+            
+            if (data && data.expirationDate) {
+                timerEl.dataset.expirationDate = data.expirationDate;
+                const timeLeft = calculateTimeLeft(data.expirationDate);
+                timerEl.textContent = timeLeft;
+                
+                // Check if expired or near expiration
+                const daysLeft = Math.ceil((new Date(data.expirationDate) - new Date()) / (1000 * 60 * 60 * 24));
+                
+                if (daysLeft <= 0) {
+                    container.style.border = '1px solid rgba(255, 59, 48, 0.5)';
+                    timerEl.style.color = '#ff3b30';
+                } else if (daysLeft <= 7) {
+                    container.style.border = '1px solid rgba(255, 204, 0, 0.5)';
+                    timerEl.style.color = '#ffcc00';
+                } else {
+                    container.style.border = '1px solid var(--border-color)';
+                    timerEl.style.color = 'var(--text-color)';
+                }
+            } else {
+                timerEl.textContent = '';
+            }
+        }
+
+        function calculateTimeLeft(expirationDate) {
+            const now = new Date();
+            const expiry = new Date(expirationDate);
+            const diffMs = expiry - now;
+            
+            if (diffMs <= 0) {
+                return 'Expired';
+            }
+            
+            const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            
+            if (days > 0) {
+                return `${days}d ${hours}h`;
+            } else {
+                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                return `${hours}h ${minutes}m`;
+            }
+        }
+
+        // CT Daily Task System (uses same Firebase account)
+        function initializeCTDailyTask() {
+            console.log('[CT Daily Task] Initializing...');
+            const { ipcRenderer } = require('electron');
+            const fs = require('fs');
+            const path = require('path');
+            
+            const dailyDataPath = path.join(__dirname, '..', 'daily-task-data.json');
+            console.log('[CT Daily Task] Data path:', dailyDataPath);
+            
+            // Load daily task data
+            let dailyData = loadDailyData(dailyDataPath);
+            updateCTDailyTaskUI(dailyData);
+            
+            // Request sync from Firebase (same account)
+            ipcRenderer.send('sync-daily-task-from-firebase');
+            
+            // Listen for Firebase sync
+            ipcRenderer.on('daily-task-synced', (event, firebaseData) => {
+                console.log('[CT Daily Task] Synced from Firebase:', firebaseData);
+                if (firebaseData && firebaseData.dailyTaskData) {
+                    const mergedData = {
+                        ...dailyData,
+                        ...firebaseData.dailyTaskData,
+                        pendingVerification: dailyData.pendingVerification || []
+                    };
+                    fs.writeFileSync(dailyDataPath, JSON.stringify(mergedData, null, 2));
+                    dailyData = mergedData;
+                    updateCTDailyTaskUI(mergedData);
+                }
+            });
+            
+            // Auto-sync every 30 seconds
+            setInterval(() => {
+                ipcRenderer.send('sync-daily-task-from-firebase');
+            }, 30000);
+            
+            // Upload button - open guide
+            const uploadBtn = document.getElementById('ct-upload-proof-btn');
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', () => {
+                    console.log('[CT Daily Task] Opening guide...');
+                    ipcRenderer.send('open-daily-task-guide');
+                });
+            }
+            
+            // Listen for verification results
+            ipcRenderer.on('proof-verified', (event, data) => {
+                dailyData = loadDailyData(dailyDataPath);
+                if (data.approved) {
+                    const today = new Date().toDateString();
+                    dailyData.lastUploadDate = today;
+                    dailyData.currentStreak += 1;
+                    dailyData.totalDays += 1;
+                    
+                    if (dailyData.currentStreak >= 10) {
+                        dailyData.discountEligible = true;
+                    }
+                    
+                    fs.writeFileSync(dailyDataPath, JSON.stringify(dailyData, null, 2));
+                    updateCTDailyTaskUI(dailyData);
+                    
+                    new Notification('✅ Verifikasi Berhasil!', {
+                        body: `Upload video Anda telah diverifikasi! Streak: ${dailyData.currentStreak} hari`,
+                        icon: '../template/CK/Logo.png'
+                    });
+                }
+            });
+        }
+
+        function loadDailyData(filePath) {
+            const fs = require('fs');
+            try {
+                if (fs.existsSync(filePath)) {
+                    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                } else {
+                    const initialData = {
+                        currentStreak: 0,
+                        totalDays: 0,
+                        lastUploadDate: null,
+                        uploadHistory: [],
+                        pendingVerification: [],
+                        discountEligible: false
+                    };
+                    fs.writeFileSync(filePath, JSON.stringify(initialData, null, 2));
+                    return initialData;
+                }
+            } catch (error) {
+                console.error('[CT Daily Task] Error loading data:', error);
+                return { currentStreak: 0, totalDays: 0, lastUploadDate: null, uploadHistory: [], pendingVerification: [], discountEligible: false };
+            }
+        }
+
+        function updateCTDailyTaskUI(dailyData) {
+            const streakEl = document.getElementById('ct-daily-streak');
+            const progressFill = document.getElementById('ct-daily-progress-fill');
+            const uploadBtn = document.getElementById('ct-upload-proof-btn');
+            
+            if (streakEl) {
+                streakEl.textContent = `${dailyData.currentStreak} hari`;
+            }
+            
+            const progressPercent = Math.min((dailyData.currentStreak / 30) * 100, 100);
+            if (progressFill) {
+                progressFill.style.width = `${progressPercent}%`;
+            }
+            
+            const today = new Date().toDateString();
+            const uploadedToday = dailyData.lastUploadDate === today;
+            
+            if (uploadBtn && uploadedToday) {
+                uploadBtn.classList.add('completed');
+                uploadBtn.innerHTML = '<i class="fas fa-check"></i> Sudah Upload';
+            }
+        }
+
+        // CT Balance Display (dummy for now)
+        function initializeCTBalance() {
+            console.log('[CT Balance] Initializing balance display (dummy)...');
+            const { ipcRenderer } = require('electron');
+            
+            // Listen for balance updates from main app
+            ipcRenderer.on('balance-update', (event, data) => {
+                console.log('[CT Balance] Received balance update:', data);
+                updateCTBalanceDisplay(data);
+            });
+            
+            // Request initial balance data
+            ipcRenderer.send('get-balance-data');
+        }
+
+        function updateCTBalanceDisplay(data) {
+            const usdEl = document.getElementById('ct-total-balance-display-usd');
+            const idrEl = document.getElementById('ct-total-balance-display-idr');
+            
+            if (usdEl && data.usd !== undefined) {
+                usdEl.textContent = `$${parseFloat(data.usd).toFixed(2)}`;
+            }
+            
+            if (idrEl && data.idr !== undefined) {
+                idrEl.textContent = `Rp ${parseInt(data.idr).toLocaleString('id-ID')}`;
+            }
+        }
+
+        // Custom scrollbar dragging & update logic
+        (function() {
+            const scrollbarContainer = document.getElementById('ct-scrollbar-container');
+            const scrollbarThumb = document.getElementById('ct-scrollbar-thumb');
+            if (!scrollbarContainer || !scrollbarThumb) return;
+            
+            let isDraggingScrollbar = false;
+            let startDragY = 0;
+            let startThumbTop = 0;
+            let currentScrollY = 0;
+            let maxScrollY = 0;
+
+            function updateScrollbarThumb(scrollY, maximumScrollY) {
+                currentScrollY = scrollY;
+                maxScrollY = maximumScrollY;
+                
+                if (maxScrollY <= 0) {
+                    scrollbarContainer.style.display = 'none';
+                    return;
+                }
+                scrollbarContainer.style.display = 'block';
+
+                const containerHeight = scrollbarContainer.clientHeight;
+                const thumbHeight = Math.max(30, Math.round((containerHeight / (containerHeight + maxScrollY)) * containerHeight));
+                scrollbarThumb.style.height = `${thumbHeight}px`;
+
+                const maxThumbTop = containerHeight - thumbHeight;
+                const percent = scrollY / maxScrollY;
+                const thumbTop = percent * maxThumbTop;
+                scrollbarThumb.style.top = `${Math.min(maxThumbTop, Math.max(0, thumbTop))}px`;
+            }
+
+            ipcRenderer.on('scroll-update', (event, data) => {
+                updateScrollbarThumb(data.scrollY, data.maxScrollY);
+            });
+
+            // Track window resize to re-check scrollbar
+            window.addEventListener('resize', () => {
+                ipcRenderer.invoke('get-scroll-state').then(state => {
+                    if (state) updateScrollbarThumb(state.scrollY, state.maxScrollY);
+                });
+            });
+
+            // Initial fetch of scroll state
+            setTimeout(() => {
+                ipcRenderer.invoke('get-scroll-state').then(state => {
+                    if (state) updateScrollbarThumb(state.scrollY, state.maxScrollY);
+                });
+            }, 500);
+
+            scrollbarThumb.addEventListener('mousedown', (e) => {
+                isDraggingScrollbar = true;
+                startDragY = e.clientY;
+                startThumbTop = parseInt(scrollbarThumb.style.top || '0');
+                scrollbarThumb.classList.add('active');
+                document.body.style.userSelect = 'none';
+                
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDraggingScrollbar) return;
+                
+                const deltaY = e.clientY - startDragY;
+                const containerHeight = scrollbarContainer.clientHeight;
+                const thumbHeight = scrollbarThumb.clientHeight;
+                const maxThumbTop = containerHeight - thumbHeight;
+                
+                let newThumbTop = startThumbTop + deltaY;
+                newThumbTop = Math.min(maxThumbTop, Math.max(0, newThumbTop));
+                
+                const percent = maxThumbTop > 0 ? (newThumbTop / maxThumbTop) : 0;
+                const targetScrollY = percent * maxScrollY;
+                
+                ipcRenderer.send('set-scroll-y', targetScrollY);
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDraggingScrollbar) {
+                    isDraggingScrollbar = false;
+                    scrollbarThumb.classList.remove('active');
+                    document.body.style.userSelect = '';
+                }
+            });
+
+            // Listen to wheel events on index.html to scroll panels
+            document.addEventListener('wheel', (e) => {
+                ipcRenderer.send('scroll-ct-panels', { deltaY: e.deltaY > 0 ? 150 : -150 });
+            }, { passive: true });
+        })();</script>
+<script>
+(function() {
+    // 1. Define custom webview element if we are not running in Electron (where customElements.get('webview') is already defined)
+    if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
+        class WebViewElement extends HTMLElement {
+            constructor() {
+                super();
+                const shadow = this.attachShadow({ mode: 'open' });
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                shadow.appendChild(iframe);
+                this._iframe = iframe;
+                
+                // Forward events from inner iframe to parent webview element
+                const self = this;
+                ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
+                    iframe.addEventListener(evtName, function(e) {
+                        const newEvt = new Event(evtName);
+                        // Copy properties
+                        for (let k in e) {
+                            try { newEvt[k] = e[k]; } catch(err){}
+                        }
+                        self.dispatchEvent(newEvt);
+                    });
+                });
+            }
+            static get observedAttributes() { return ['src']; }
+            attributeChangedCallback(name, oldValue, newValue) {
+                if (name === 'src' && this._iframe) {
+                    this._iframe.src = newValue;
+                }
+            }
+            get src() {
+                return this._iframe ? this._iframe.src : '';
+            }
+            set src(val) {
+                if (this._iframe) this._iframe.src = val;
+                this.setAttribute('src', val);
+            }
+            get name() {
+                return this._iframe ? this._iframe.name : '';
+            }
+            set name(val) {
+                if (this._iframe) this._iframe.name = val;
+                this.setAttribute('name', val);
+            }
+            loadURL(url, options) {
+                return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
+            }
+            clearStorageData() { return Promise.resolve(); }
+            setProxy() { return Promise.resolve(); }
+            setCookies() { return Promise.resolve(); }
+            getCookies() { return Promise.resolve([]); }
+            setUserAgent() { return Promise.resolve(); }
+        }
+        customElements.define('webview', WebViewElement);
+    }
+
+    if (typeof HTMLIFrameElement !== 'undefined') {
+        var originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
+        if (originalSrcDescriptor && originalSrcDescriptor.set) {
+            Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+                get: function() {
+                    return originalSrcDescriptor.get.call(this);
+                },
+                set: function(val) {
+                    originalSrcDescriptor.set.call(this, val);
+                    var iframe = this;
+                    setTimeout(function() {
+                        iframe.dispatchEvent(new Event('did-navigate'));
+                        iframe.dispatchEvent(new Event('did-finish-load'));
+                    }, 50);
+                }
+            });
+        }
+        HTMLIFrameElement.prototype.loadURL = function(url, options) {
+            var iframe = this;
+            var htmlContent = '';
+            
+            if (url.startsWith('data:text/html,')) {
+                htmlContent = decodeURIComponent(url.substring('data:text/html,'.length));
+            } else if (url.startsWith('data:text/html;base64,')) {
+                htmlContent = atob(url.substring('data:text/html;base64,'.length));
+            } else {
+                iframe.src = url;
+                return Promise.resolve();
+            }
+            var baseUrl = (options && options.baseURLForDataURL) ? options.baseURLForDataURL : 'https://worker.captchatypers.com/';
+            var frameId = 'frame_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+            if (!iframe.name) {
+                iframe.name = frameId;
+            }
+            // Synchronous XHR ensures HTML is saved in memory before iframe navigates
+            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || 'http://127.0.0.1:5000').replace(/\/+$/, '');
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', captchaServer + '/store_captcha_frame', false); // Synchronous
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ id: frameId, html: htmlContent, domain: baseUrl }));
+            } catch(e) {
+                console.error('[Sync Store Error]', e);
+            }
+            iframe.src = captchaServer + '/render_captcha_frame?id=' + frameId;
+            setTimeout(function() {
+                var loadedEvt = new Event('console-message');
+                loadedEvt.message = 'frame loaded !';
+                iframe.dispatchEvent(loadedEvt);
+                
+                var loadedEvt2 = new Event('console-message');
+                loadedEvt2.message = 'frame-onload';
+                iframe.dispatchEvent(loadedEvt2);
+                
+                var activeEvt = new Event('console-message');
+                activeEvt.message = 'detect-active';
+                iframe.dispatchEvent(activeEvt);
+                
+                iframe.dispatchEvent(new Event('did-finish-load'));
+                iframe.dispatchEvent(new Event('did-navigate'));
+            }, 100);
+            return Promise.resolve();
+        };
+        HTMLIFrameElement.prototype.clearStorageData = function() { return Promise.resolve(); };
+        HTMLIFrameElement.prototype.setProxy = function() { return Promise.resolve(); };
+        HTMLIFrameElement.prototype.setCookies = function() { return Promise.resolve(); };
+        HTMLIFrameElement.prototype.getCookies = function() { return Promise.resolve([]); };
+        HTMLIFrameElement.prototype.setUserAgent = function() { return Promise.resolve(); };
+    }
+    
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'ctor-console-event') {
+            var msg = event.data.msg;
+            if (msg === 'frame-load-error') {
+                return;
+            }
+            var iframeId = event.data.iframeId;
+            
+            // 1. Dispatch event to standard iframes
+            var iframes = document.querySelectorAll('iframe');
+            iframes.forEach(function(iframe) {
+                if (!iframeId || iframe.name === iframeId || iframes.length === 1) {
+                    var evt = new Event('console-message');
+                    evt.message = msg;
+                    iframe.dispatchEvent(evt);
+                }
+            });
+            
+            // 2. Dispatch event to custom webview elements
+            var webviews = document.querySelectorAll('webview');
+            webviews.forEach(function(webview) {
+                if (webview._iframe && (webview._iframe.name === iframeId || !iframeId || webviews.length === 1)) {
+                    var evt = new Event('console-message');
+                    evt.message = msg;
+                    webview.dispatchEvent(evt);
+                }
+            });
+        }
+    });
+})();
+</script>
+</body></html>

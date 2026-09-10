@@ -1,0 +1,886 @@
+<!doctype html><html><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://www.gstatic.com https://*.hcaptcha.com https://*.arkoselabs.com https://*.funcaptcha.com https://*.geetest.com https://challenges.cloudflare.com https://static.xcaptcha.com; frame-src 'self' https://*.google.com https://*.hcaptcha.com https://*.arkoselabs.com https://*.funcaptcha.com https://static.xcaptcha.com https://api.xcaptcha.com https://2captcha.com; connect-src 'self' ws://localhost:* https://*.firebaseio.com https://www.googleapis.com https://doniramdani820-amz.hf.space https://doniramdani820-ocr-fastapi-stable.hf.space https://doniramdani820-textbaru.hf.space https://doniramdani820-coordinat.hf.space https://rucaptcha.com https://api.exchangerate-api.com https://*.hcaptcha.com https://*.arkoselabs.com https://api.xcaptcha.com https://static.xcaptcha.com; img-src 'self' data: https://*.google.com https://*.gstatic.com https://*.hcaptcha.com https://*.arkoselabs.com https://static.xcaptcha.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.hcaptcha.com https://static.xcaptcha.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;"><title>CaptchaKing - Control Panel</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="./template/styles/main.css"></head><body><header id="title-bar"><div class="logo-container"><img src="./template/CK/Logo.png" alt="CaptchaKing Logo"><h1>Captcha<span class="king-text">King</span> <span class="version-tag">v0.3.8</span></h1><div class="app-switch-container"><button id="app-switch-btn" class="app-switch-btn" title="Switch to Pure Solver"><span id="app-switch-text">pure solver</span></button></div></div><div class="center-container"><div class="controls-container"><div class="settings-group"><label for="panel-count">Panels:</label> <input type="number" id="panel-count" value="4" min="1" max="100"> <button id="create-panels-btn">Set & Relaunch</button></div></div><div id="expiration-container" class="expiration-container" style="display: none !important;"><i class="fas fa-hourglass-half" style="display: none !important;"></i><div id="time-left-display" class="timer-display">Loading...</div></div><div class="daily-task-container" style="display: none !important;"><i class="fas fa-video"></i><div class="daily-progress"><span id="daily-streak" class="streak-count">0 days</span><div class="progress-bar"><div id="daily-progress-fill" class="progress-fill" style="width: 0%"></div></div><button id="upload-proof-btn" class="upload-proof-btn" title="Guide & Upload Video Proof"><i class="fas fa-video"></i> View Guide</button></div></div><div class="balance-container"><i class="fas fa-wallet"></i> <span id="total-balance-display-usd">$0.00</span> <span class="balance-separator" style="display: none !important;">|</span> <span id="total-balance-display-idr" style="display: none !important;">Rp 0</span></div></div><div class="window-actions-container"><button id="admin-verification-btn" class="control-btn admin-btn hidden" title="Admin - Video Upload Verification" style="display:none;"><i class="fas fa-shield-alt"></i></button><div class="panel-controls-group" id="panel-controls-group"><button id="panel-auto-next-btn" class="control-btn panel-ctrl-next" title="Auto Next Login - Click Next in all panels"><i class="fas fa-arrow-right"></i></button> <button id="panel-auto-combo-btn" class="control-btn panel-ctrl-combo" title="Auto Combo - Login then auto Start (Next → Wait → Start)"><i class="fas fa-bolt"></i></button> <button id="panel-auto-start-btn" class="control-btn panel-ctrl-start" title="Auto Start - Start session in all panels"><i class="fas fa-play"></i></button> <button id="panel-auto-stop-btn" class="control-btn panel-ctrl-stop" title="Auto Stop - Stop session in all panels"><i class="fas fa-stop"></i></button> <button id="panel-close-captcha-btn" class="control-btn panel-ctrl-close" title="Close Captcha - Click 'Can not solve' in all panels (⚠️ reduces accuracy)" disabled="disabled"><i class="fas fa-ban"></i></button></div><button id="toggle-visibility-btn" class="control-btn toggle-btn" title="Toggle Header Element Visibility"><i class="fas fa-eye"></i></button> <button id="advanced-settings-btn" class="control-btn" title="Advanced Settings"><i class="fas fa-cog"></i></button><div class="scroll-controls"><button id="scroll-up-btn" class="control-btn" title="Scroll Up All Panels"><i class="fas fa-chevron-up"></i></button> <button id="scroll-down-btn" class="control-btn" title="Scroll Down All Panels"><i class="fas fa-chevron-down"></i></button></div><div class="window-controls"><button id="minimize-btn" class="control-btn" title="Minimize All"><i class="fas fa-window-minimize"></i></button> <button id="close-btn" class="control-btn" title="Close App"><i class="fas fa-times"></i></button></div></div></header><div id="visibility-menu" class="visibility-menu hidden" style="display: none !important;"><div class="visibility-menu-header"><h3>Manage Header Visibility</h3><button id="close-visibility-menu" class="close-menu-btn"><i class="fas fa-times"></i></button></div><div class="visibility-status-summary"><div class="status-column visible-column"><div class="status-header"><i class="fas fa-eye"></i> <span>Displayed (<span id="visible-count">7</span>)</span></div><ul id="visible-list" class="status-list"></ul></div><div class="status-column hidden-column"><div class="status-header"><i class="fas fa-eye-slash"></i> <span>Hidden (<span id="hidden-count">0</span>)</span></div><ul id="hidden-list" class="status-list"></ul></div></div><div class="visibility-menu-divider"></div><div class="visibility-menu-content"><div class="visibility-section-title"><i class="fas fa-sliders-h"></i> <span>Toggle Elements</span></div><div class="visibility-option"><label><input type="checkbox" id="toggle-app-switch"> <span>App Switcher (Pure Solver)</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-version"> <span>Version Tag</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-expiration" checked="checked"> <span>Expiration Timer</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-daily-task"> <span>Daily Task Progress</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-balance" checked="checked"> <span>Balance</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-scroll-controls"> <span>Scroll Controls</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-advanced-settings" checked="checked"> <span>Advanced Settings Button</span></label></div></div><div class="visibility-menu-footer"><button id="reset-visibility" class="reset-btn"><i class="fas fa-undo"></i> Reset Default</button><div class="info-text"><i class="fas fa-info-circle"></i> <span>Settings saved automatically</span></div></div></div><script src="./renderer.js"></script><script>// ipcRenderer sudah dideklarasikan di renderer.js, kita hanya perlu require modules lainnya
+        const fs = require('fs');
+        const path = require('path');
+
+        // Helper function to get user data directory path (production safe)
+        function getUserDataPath(filename) {
+            try {
+                // Use ipcRenderer to get path from main process
+                const userDataPath = ipcRenderer.sendSync('get-user-data-path');
+                if (userDataPath) {
+                    return path.join(userDataPath, filename);
+                }
+            } catch (error) {
+                console.warn('[Main HTML] Could not get userData path from main process:', error);
+            }
+
+            // Fallback to __dirname for development
+            return path.join(__dirname, filename);
+        }
+
+        // App Switch Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[Main HTML] ===== DOMContentLoaded fired =====');
+            console.log('[Main HTML] Looking for buttons...');
+
+            const appSwitchBtn = document.getElementById('app-switch-btn');
+            console.log('[Main HTML] app-switch-btn:', appSwitchBtn ? 'FOUND' : 'NOT FOUND');
+
+            if (appSwitchBtn) {
+                appSwitchBtn.addEventListener('click', () => {
+                    console.log('[Login] [Main HTML] App Switch button clicked, switching to Pure Solver...');
+                    ipcRenderer.send('switch-to-ct-app');
+                });
+            }
+
+            // Sync Version with package.json
+            try {
+                const packageJsonPath = path.join(__dirname, 'package.json');
+                if (fs.existsSync(packageJsonPath)) {
+                    const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+                    const versionTag = document.querySelector('.version-tag');
+                    // Use version2 for display as requested
+                    if (versionTag && packageData.version2) {
+                        versionTag.textContent = `v${packageData.version2}`;
+                        console.log(`[Main HTML] Version updated to v${packageData.version2} from package.json`);
+                    }
+                }
+            } catch (err) {
+                console.error('[Main HTML] Failed to sync version:', err);
+            }
+
+            // Daily Task System
+            console.log('[Main HTML] Initializing Daily Task System...');
+            initializeDailyTaskSystem();
+
+            // Visibility Toggle System
+            console.log('[Main HTML] Initializing Visibility Toggle System...');
+            initializeVisibilityToggleSystem();
+
+            // Panel Control System (Auto Next, Start, Stop, Close Captcha)
+            console.log('[Main HTML] Initializing Panel Control System...');
+            initializePanelControlSystem();
+
+            // Admin verification panel button (HIDDEN - hanya untuk admin)
+            const adminVerificationBtn = document.getElementById('admin-verification-btn');
+            console.log('[Main HTML] admin-verification-btn:', adminVerificationBtn ? 'FOUND' : 'NOT FOUND');
+
+            // Secret shortcut: Ctrl+Shift+A untuk buka admin panel
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                    console.log('[Main HTML] ===== Admin shortcut triggered! =====');
+                    console.log('[Main HTML] Sending IPC: open-admin-verification-panel');
+                    ipcRenderer.send('open-admin-verification-panel');
+                    e.preventDefault();
+                }
+            });
+
+            // Click listener masih ada tapi button hidden
+            if (adminVerificationBtn) {
+                adminVerificationBtn.addEventListener('click', () => {
+                    console.log('[Main HTML] ===== Admin button CLICKED! =====');
+                    ipcRenderer.send('open-admin-verification-panel');
+                });
+            }
+
+            console.log('[Main HTML] ===== DOMContentLoaded setup complete =====');
+        });
+
+        // Daily Task System
+        function initializeDailyTaskSystem() {
+            console.log('[Daily Task] initializeDailyTaskSystem() called');
+            const dailyDataPath = getUserDataPath('daily-task-data.json');
+            console.log('[Daily Task] Data path:', dailyDataPath);
+
+            // Load or initialize daily task data
+            let dailyData = loadDailyData(dailyDataPath);
+            console.log('[Daily Task] Data loaded:', dailyData);
+
+            // Update UI
+            updateDailyTaskUI(dailyData);
+
+            // Request sync from Firebase
+            console.log('[Daily Task] Requesting sync from Firebase...');
+            ipcRenderer.send('sync-daily-task-from-firebase');
+
+            // Listen for Firebase sync updates
+            ipcRenderer.on('daily-task-synced', (event, firebaseData) => {
+                console.log('[Daily Task] ✅ Received sync from Firebase:', firebaseData);
+                if (firebaseData && firebaseData.dailyTaskData) {
+                    // Merge with local data
+                    const mergedData = {
+                        ...dailyData,
+                        ...firebaseData.dailyTaskData,
+                        // Keep pending verifications from local
+                        pendingVerification: dailyData.pendingVerification || []
+                    };
+                    fs.writeFileSync(dailyDataPath, JSON.stringify(mergedData, null, 2));
+                    dailyData = mergedData;
+                    // Update UI with synced data
+                    updateDailyTaskUI(mergedData);
+                    console.log('[Daily Task] 🔄 UI updated with streak:', mergedData.currentStreak);
+                }
+            });
+
+            // Auto-sync every 30 seconds
+            setInterval(() => {
+                console.log('[Daily Task] Auto-syncing from Firebase...');
+                ipcRenderer.send('sync-daily-task-from-firebase');
+            }, 30000); // 30 seconds
+
+            // Upload proof button - open guide window instead
+            const uploadBtn = document.getElementById('upload-proof-btn');
+            console.log('[Daily Task] upload-proof-btn:', uploadBtn ? 'FOUND' : 'NOT FOUND');
+
+            if (uploadBtn) {
+                console.log('[Daily Task] Upload proof button found, attaching listener');
+                uploadBtn.addEventListener('click', () => {
+                    console.log('[Daily Task] ===== Upload button CLICKED! =====');
+                    console.log('[Daily Task] Sending IPC: open-daily-task-guide');
+                    ipcRenderer.send('open-daily-task-guide');
+                });
+            } else {
+                console.error('[Daily Task] ❌ Upload proof button NOT found!');
+            }
+
+            // Check daily reset
+            checkDailyReset(dailyDataPath, dailyData);
+            console.log('[Daily Task] initializeDailyTaskSystem() complete');
+        }
+
+        function loadDailyData(filePath) {
+            try {
+                if (fs.existsSync(filePath)) {
+                    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                    return data;
+                } else {
+                    const initialData = {
+                        currentStreak: 0,
+                        totalDays: 0,
+                        lastUploadDate: null,
+                        uploadHistory: [],
+                        pendingVerification: [],
+                        discountEligible: false
+                    };
+                    fs.writeFileSync(filePath, JSON.stringify(initialData, null, 2));
+                    return initialData;
+                }
+            } catch (error) {
+                console.error('Error loading daily data:', error);
+                return { currentStreak: 0, totalDays: 0, lastUploadDate: null, uploadHistory: [], pendingVerification: [], discountEligible: false };
+            }
+        }
+
+        function updateDailyTaskUI(dailyData) {
+            const streakEl = document.getElementById('daily-streak');
+            const progressFill = document.getElementById('daily-progress-fill');
+            const uploadBtn = document.getElementById('upload-proof-btn');
+
+            if (streakEl) {
+                streakEl.textContent = `${dailyData.currentStreak} days`;
+            }
+
+            // Progress bar based on streak (max 30 days for 100%)
+            const progressPercent = Math.min((dailyData.currentStreak / 30) * 100, 100);
+            if (progressFill) {
+                progressFill.style.width = `${progressPercent}%`;
+            }
+
+            // Check if already uploaded today
+            const today = new Date().toDateString();
+            const uploadedToday = dailyData.lastUploadDate === today;
+
+            if (uploadBtn && uploadedToday) {
+                uploadBtn.classList.add('completed');
+                uploadBtn.innerHTML = '<i class="fas fa-check"></i> Already Uploaded Today';
+                // Don't disable - user can still view guide
+                // uploadBtn.disabled = true;
+            }
+
+            // Show encouragement message
+            if (dailyData.currentStreak > 0 && dailyData.currentStreak % 7 === 0) {
+                showEncouragementMessage(dailyData.currentStreak);
+            }
+        }
+
+        // handleUploadProof function removed - now handled in guide window
+
+        function checkDailyReset(filePath, dailyData) {
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+            // If no upload yesterday and had a streak, reset streak
+            if (dailyData.lastUploadDate && dailyData.lastUploadDate !== today && dailyData.lastUploadDate !== yesterday) {
+                dailyData.currentStreak = 0;
+                fs.writeFileSync(filePath, JSON.stringify(dailyData, null, 2));
+                updateDailyTaskUI(dailyData);
+            }
+        }
+
+        function showEncouragementMessage(streak) {
+            const messages = [
+                `🎉 Amazing! Streak ${streak} days! Keep consistently uploading videos!`,
+                `💪 Great! ${streak} days in a row! 10% discount is getting closer!`,
+                `🔥 Awesome! ${streak} days streak! Don't forget to upload video today!`,
+                `⭐ Cool! ${streak} days consistent! Admin appreciates your effort!`
+            ];
+
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+
+            setTimeout(() => {
+                const notification = new Notification('Daily Task - CaptchaKing', {
+                    body: randomMsg,
+                    icon: './template/CK/Logo.png'
+                });
+            }, 2000);
+        }
+
+        // Listen for verification results from admin
+        ipcRenderer.on('proof-verified', (event, data) => {
+            const dailyDataPath = getUserDataPath('daily-task-data.json');
+            let dailyData = loadDailyData(dailyDataPath);
+
+            if (data.approved) {
+                const today = new Date().toDateString();
+                dailyData.lastUploadDate = today;
+                dailyData.currentStreak += 1;
+                dailyData.totalDays += 1;
+
+                // Check if eligible for discount (minimum 10 days streak)
+                if (dailyData.currentStreak >= 10) {
+                    dailyData.discountEligible = true;
+                }
+
+                // Remove from pending
+                dailyData.pendingVerification = dailyData.pendingVerification.filter(
+                    p => p.timestamp !== data.timestamp
+                );
+
+                // Add to history
+                dailyData.uploadHistory.push({
+                    date: today,
+                    timestamp: data.timestamp,
+                    verified: true
+                });
+
+                fs.writeFileSync(dailyDataPath, JSON.stringify(dailyData, null, 2));
+                updateDailyTaskUI(dailyData);
+
+                // Show success notification
+                new Notification('✅ Verification Successful!', {
+                    body: `Your video upload has been verified! Streak: ${dailyData.currentStreak} days`,
+                    icon: './template/CK/Logo.png'
+                });
+            } else {
+                // Show rejection notification
+                new Notification('❌ Verification Rejected', {
+                    body: data.reason || 'Invalid proof. Please re-upload with correct proof.',
+                    icon: './template/CK/Logo.png'
+                });
+
+                // Reset upload button
+                const uploadBtn = document.getElementById('upload-proof-btn');
+                uploadBtn.innerHTML = '<i class="fas fa-video"></i> View Guide';
+                uploadBtn.classList.remove('completed');
+            }
+        });
+
+        // Listen for discount claim status
+        ipcRenderer.on('check-discount-eligibility', (event) => {
+            const dailyDataPath = getUserDataPath('daily-task-data.json');
+            const dailyData = loadDailyData(dailyDataPath);
+
+            ipcRenderer.send('discount-eligibility-response', {
+                eligible: dailyData.discountEligible,
+                streak: dailyData.currentStreak,
+                discountPercent: Math.min(15, Math.floor(dailyData.currentStreak / 2)) // Max 15%
+            });
+        });
+
+        // ===== PANEL CONTROL SYSTEM =====
+        function initializePanelControlSystem() {
+            console.log('[Panel Control] Initializing...');
+
+            const autoNextBtn = document.getElementById('panel-auto-next-btn');
+            const autoStartBtn = document.getElementById('panel-auto-start-btn');
+            const autoStopBtn = document.getElementById('panel-auto-stop-btn');
+            const closeCaptchaBtn = document.getElementById('panel-close-captcha-btn');
+
+            let closeCaptchaEnabled = false;
+
+            // Auto Next Login - Klik "Next" di semua panel
+            if (autoNextBtn) {
+                autoNextBtn.addEventListener('click', () => {
+                    console.log('[Panel Control] 🔄 Auto Next Login triggered');
+                    ipcRenderer.send('panel-auto-next');
+                });
+            }
+
+            // Auto Combo - Login lalu otomatis Start
+            const autoComboBtn = document.getElementById('panel-auto-combo-btn');
+            if (autoComboBtn) {
+                autoComboBtn.addEventListener('click', () => {
+                    console.log('[Panel Control] ⚡ Auto Combo (Login → Start) triggered');
+                    autoComboBtn.disabled = true;
+                    autoComboBtn.classList.add('combo-running');
+                    autoComboBtn.title = 'Combo sedang berjalan...';
+                    ipcRenderer.send('panel-auto-combo');
+                });
+            }
+
+            // Listen for combo progress updates
+            ipcRenderer.on('panel-combo-progress', (event, data) => {
+                const comboBtn = document.getElementById('panel-auto-combo-btn');
+                if (!comboBtn) return;
+
+                if (data.phase === 'login-done') {
+                    comboBtn.title = `Login: ${data.clicked}/${data.total} berhasil. Menunggu tombol Start...`;
+                    comboBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                } else if (data.phase === 'waiting') {
+                    comboBtn.title = `Menunggu tombol Start muncul... (${data.found}/${data.total} ditemukan)`;
+                } else if (data.phase === 'start-done') {
+                    comboBtn.title = `Combo selesai! Start: ${data.clicked}/${data.total} berhasil`;
+                    comboBtn.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        comboBtn.disabled = false;
+                        comboBtn.classList.remove('combo-running');
+                        comboBtn.innerHTML = '<i class="fas fa-bolt"></i>';
+                        comboBtn.title = 'Auto Combo - Login then auto Start (Next → Wait → Start)';
+                    }, 2000);
+                } else if (data.phase === 'error' || data.phase === 'timeout') {
+                    comboBtn.title = data.message || 'Combo gagal/timeout';
+                    comboBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    setTimeout(() => {
+                        comboBtn.disabled = false;
+                        comboBtn.classList.remove('combo-running');
+                        comboBtn.innerHTML = '<i class="fas fa-bolt"></i>';
+                        comboBtn.title = 'Auto Combo - Login then auto Start (Next → Wait → Start)';
+                    }, 3000);
+                }
+            });
+
+            // Auto Start - Klik "Get started" di semua panel
+            if (autoStartBtn) {
+                autoStartBtn.addEventListener('click', () => {
+                    console.log('[Panel Control] ▶️ Auto Start triggered');
+                    ipcRenderer.send('panel-auto-start');
+                });
+            }
+
+            // Auto Stop - Klik "Stop/Pause" di semua panel
+            if (autoStopBtn) {
+                autoStopBtn.addEventListener('click', () => {
+                    console.log('[Panel Control] ⏹️ Auto Stop triggered');
+                    ipcRenderer.send('panel-auto-stop');
+                });
+            }
+
+            // Close Captcha - Toggle enable/disable dengan warning
+            if (closeCaptchaBtn) {
+                closeCaptchaBtn.addEventListener('click', () => {
+                    if (!closeCaptchaEnabled) {
+                        // Pertama kali: tampilkan warning dan enable
+                        const confirmEnable = confirm(
+                            '⚠️ WARNING: Close Captcha\n\n' +
+                            'Enabling "Close Captcha" will click "Can not solve" in all panels.\n\n' +
+                            'If used too often, account accuracy may DECREASE!\n\n' +
+                            'Are you sure you want to enable?'
+                        );
+
+                        if (confirmEnable) {
+                            closeCaptchaEnabled = true;
+                            closeCaptchaBtn.disabled = false;
+                            closeCaptchaBtn.classList.add('active-warning');
+                            closeCaptchaBtn.title = 'Close Captcha ACTIVE - Click to execute (⚠️ can decrease accuracy)';
+                            console.log('[Panel Control] ⚠️ Close Captcha ENABLED');
+                        }
+                        return;
+                    }
+
+                    // Sudah enabled: eksekusi close captcha
+                    console.log('[Panel Control] 🚫 Close Captcha triggered');
+                    ipcRenderer.send('panel-close-captcha');
+                });
+
+                // Double-click untuk disable kembali
+                closeCaptchaBtn.addEventListener('dblclick', () => {
+                    if (closeCaptchaEnabled) {
+                        closeCaptchaEnabled = false;
+                        closeCaptchaBtn.classList.remove('active-warning');
+                        closeCaptchaBtn.disabled = true;
+                        closeCaptchaBtn.title = 'Close Captcha - Click to enable (⚠️ decreases accuracy)';
+                        console.log('[Panel Control] ✅ Close Captcha DISABLED');
+                    }
+                });
+            }
+
+            // Listen for IPC response (feedback dari main process)
+            ipcRenderer.on('panel-control-result', (event, data) => {
+                console.log(`[Panel Control] Result: ${data.action} - ${data.clicked}/${data.total} panels clicked`);
+            });
+
+            console.log('[Panel Control] ✅ System initialized');
+        }
+
+        // ===== VISIBILITY TOGGLE SYSTEM =====
+        function initializeVisibilityToggleSystem() {
+            console.log('[Visibility Toggle] Initializing...');
+
+            const toggleBtn = document.getElementById('toggle-visibility-btn');
+            const visibilityMenu = document.getElementById('visibility-menu');
+            const closeMenuBtn = document.getElementById('close-visibility-menu');
+            const resetBtn = document.getElementById('reset-visibility');
+
+            // Element mappings with display names
+            const elementMappings = {
+                'toggle-app-switch': {
+                    selector: '.app-switch-container',
+                    name: 'App Switcher'
+                },
+                'toggle-version': {
+                    selector: '.version-tag',
+                    name: 'Version Tag'
+                },
+                'toggle-expiration': {
+                    selector: '.expiration-container',
+                    name: 'Expiration Timer'
+                },
+                'toggle-daily-task': {
+                    selector: '.daily-task-container',
+                    name: 'Daily Task'
+                },
+                'toggle-balance': {
+                    selector: '.balance-container',
+                    name: 'Balance'
+                },
+                'toggle-scroll-controls': {
+                    selector: '.scroll-controls',
+                    name: 'Scroll Controls'
+                },
+                'toggle-advanced-settings': {
+                    selector: '#advanced-settings-btn',
+                    name: 'Advanced Settings'
+                },
+                'toggle-panel-controls': {
+                    selector: '.panel-controls-group',
+                    name: 'Panel Controls'
+                }
+            };
+
+            // Load saved visibility settings
+            function loadVisibilitySettings() {
+                const saved = localStorage.getItem('header-visibility-settings');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+                // Default: only expiration, balance, advanced settings, and panel controls visible
+                return {
+                    'toggle-app-switch': true,
+                    'toggle-version': false,
+                    'toggle-expiration': true,
+                    'toggle-daily-task': false,
+                    'toggle-balance': true,
+                    'toggle-scroll-controls': false,
+                    'toggle-advanced-settings': true,
+                    'toggle-panel-controls': true
+                };
+            }
+
+            // Save visibility settings
+            function saveVisibilitySettings(settings) {
+                localStorage.setItem('header-visibility-settings', JSON.stringify(settings));
+                console.log('[Visibility Toggle] Settings saved:', settings);
+            }
+
+            // Update status lists (Visible/Hidden)
+            function updateStatusLists(settings) {
+                const visibleList = document.getElementById('visible-list');
+                const hiddenList = document.getElementById('hidden-list');
+                const visibleCount = document.getElementById('visible-count');
+                const hiddenCount = document.getElementById('hidden-count');
+
+                if (!visibleList || !hiddenList) return;
+
+                // Clear lists
+                visibleList.innerHTML = '';
+                hiddenList.innerHTML = '';
+
+                let visibleItems = 0;
+                let hiddenItems = 0;
+
+                // Populate lists
+                Object.keys(elementMappings).forEach(checkboxId => {
+                    const mapping = elementMappings[checkboxId];
+                    const isVisible = settings[checkboxId] !== false;
+
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <i class="fas fa-circle status-dot"></i>
+                        <span>${mapping.name}</span>
+                    `;
+
+                    if (isVisible) {
+                        visibleList.appendChild(li);
+                        visibleItems++;
+                    } else {
+                        hiddenList.appendChild(li);
+                        hiddenItems++;
+                    }
+                });
+
+                // Update counts
+                if (visibleCount) visibleCount.textContent = visibleItems;
+                if (hiddenCount) hiddenCount.textContent = hiddenItems;
+
+                // Show "Tidak ada" message if list is empty
+                if (visibleItems === 0) {
+                    visibleList.innerHTML = '<li class="empty-message"><i class="fas fa-info-circle"></i> None</li>';
+                }
+                if (hiddenItems === 0) {
+                    hiddenList.innerHTML = '<li class="empty-message"><i class="fas fa-info-circle"></i> None</li>';
+                }
+
+                console.log(`[Visibility Toggle] Lists updated - Visible: ${visibleItems}, Hidden: ${hiddenItems}`);
+            }
+
+            // Apply visibility settings
+            function applyVisibilitySettings(settings) {
+                console.log('[applyVisibilitySettings] Starting to apply settings:', settings);
+
+                Object.keys(elementMappings).forEach(checkboxId => {
+                    const mapping = elementMappings[checkboxId];
+                    const element = document.querySelector(mapping.selector);
+                    const checkbox = document.getElementById(checkboxId);
+
+                    if (element) {
+                        const isVisible = settings[checkboxId] !== false;
+
+                        // Add smooth transition
+                        if (!element.style.transition) {
+                            element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        }
+
+                        if (isVisible) {
+                            // Show with smooth transition
+                            element.style.opacity = '0';
+                            element.style.transform = 'scale(0.95)';
+                            element.style.display = '';
+                            element.classList.remove('visibility-hidden');
+
+                            // Trigger reflow then animate
+                            setTimeout(() => {
+                                element.style.opacity = '1';
+                                element.style.transform = 'scale(1)';
+                            }, 10);
+
+                            console.log(`[applyVisibilitySettings] ✅ Showing: ${mapping.name}`);
+                        } else {
+                            // Hide with smooth transition
+                            element.style.opacity = '0';
+                            element.style.transform = 'scale(0.95)';
+                            element.classList.add('visibility-hidden');
+
+                            // Wait for transition then hide
+                            setTimeout(() => {
+                                element.style.display = 'none';
+                            }, 300);
+
+                            console.log(`[applyVisibilitySettings] ❌ Hiding: ${mapping.name}`);
+                        }
+
+                        // Update checkbox state if exists
+                        if (checkbox) {
+                            checkbox.checked = isVisible;
+                        }
+                    } else {
+                        console.warn(`[applyVisibilitySettings] ⚠️ Element not found for: ${mapping.selector}`);
+                    }
+                });
+
+                // Update status lists (if in menu)
+                if (typeof updateStatusLists === 'function') {
+                    updateStatusLists(settings);
+                }
+
+                console.log('[applyVisibilitySettings] ✅ All settings applied');
+            }
+
+            // Initialize with saved settings
+            const currentSettings = loadVisibilitySettings();
+            applyVisibilitySettings(currentSettings);
+
+            // UPDATED: Toggle menu sebagai overlay view terpisah
+            let isMenuOpen = false;
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    isMenuOpen = !isMenuOpen;
+
+                    // Send IPC to main process to toggle overlay
+                    ipcRenderer.send('toggle-visibility-menu', isMenuOpen);
+
+                    // Update button visual state
+                    if (isMenuOpen) {
+                        toggleBtn.classList.add('active');
+                        toggleBtn.querySelector('i').classList.remove('fa-eye');
+                        toggleBtn.querySelector('i').classList.add('fa-eye-slash');
+                        console.log('[Visibility Toggle] Requesting menu open');
+                    } else {
+                        toggleBtn.classList.remove('active');
+                        toggleBtn.querySelector('i').classList.remove('fa-eye-slash');
+                        toggleBtn.querySelector('i').classList.add('fa-eye');
+                        console.log('[Visibility Toggle] Requesting menu close');
+                    }
+                });
+            }
+
+            // Close menu button
+            if (closeMenuBtn) {
+                closeMenuBtn.addEventListener('click', () => {
+                    visibilityMenu.classList.add('hidden');
+                    visibilityMenu.classList.remove('visible');
+                    if (toggleBtn) {
+                        toggleBtn.classList.remove('active');
+                        toggleBtn.querySelector('i').classList.remove('fa-eye-slash');
+                        toggleBtn.querySelector('i').classList.add('fa-eye');
+                    }
+                    console.log('[Visibility Toggle] Menu closed via close button');
+                });
+            }
+
+            // Handle checkbox changes
+            Object.keys(elementMappings).forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.addEventListener('change', (e) => {
+                        const mapping = elementMappings[checkboxId];
+                        const element = document.querySelector(mapping.selector);
+
+                        if (element) {
+                            if (e.target.checked) {
+                                element.style.display = '';
+                                element.classList.remove('visibility-hidden');
+                                console.log(`[Visibility Toggle] Showing: ${mapping.name}`);
+                            } else {
+                                element.style.display = 'none';
+                                element.classList.add('visibility-hidden');
+                                console.log(`[Visibility Toggle] Hiding: ${mapping.name}`);
+                            }
+
+                            // Save settings
+                            const newSettings = loadVisibilitySettings();
+                            newSettings[checkboxId] = e.target.checked;
+                            saveVisibilitySettings(newSettings);
+
+                            // Update status lists
+                            updateStatusLists(newSettings);
+                        }
+                    });
+                }
+            });
+
+            // Reset button
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    const defaultSettings = {
+                        'toggle-app-switch': false,
+                        'toggle-version': false,
+                        'toggle-expiration': true,
+                        'toggle-daily-task': false,
+                        'toggle-balance': true,
+                        'toggle-scroll-controls': false,
+                        'toggle-advanced-settings': true,
+                        'toggle-panel-controls': true
+                    };
+
+                    saveVisibilitySettings(defaultSettings);
+                    applyVisibilitySettings(defaultSettings);
+
+                    // Show notification
+                    new Notification('Visibility Reset', {
+                        body: 'All header elements have been returned to default view',
+                        icon: './template/CK/Logo.png'
+                    });
+
+                    console.log('[Visibility Toggle] Settings reset to default');
+                });
+            }
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (visibilityMenu && !visibilityMenu.classList.contains('hidden')) {
+                    const isClickInside = visibilityMenu.contains(e.target) ||
+                        (toggleBtn && toggleBtn.contains(e.target));
+
+                    if (!isClickInside) {
+                        visibilityMenu.classList.add('hidden');
+                        visibilityMenu.classList.remove('visible');
+                        if (toggleBtn) {
+                            toggleBtn.classList.remove('active');
+                            toggleBtn.querySelector('i').classList.remove('fa-eye-slash');
+                            toggleBtn.querySelector('i').classList.add('fa-eye');
+                        }
+                        console.log('[Visibility Toggle] Menu closed via outside click');
+                    }
+                }
+            });
+
+            // Auto-detect overflow and show hint
+            function checkHeaderOverflow() {
+                const titleBar = document.getElementById('title-bar');
+                const centerContainer = document.querySelector('.center-container');
+
+                if (titleBar && centerContainer) {
+                    // Check if content is overflowing
+                    const isOverflowing = centerContainer.scrollWidth > centerContainer.clientWidth;
+
+                    if (isOverflowing) {
+                        // Add visual indicators
+                        if (toggleBtn) {
+                            toggleBtn.classList.add('overflow-hint');
+                        }
+                        centerContainer.classList.add('overflowing');
+                        console.log('[Visibility Toggle] Overflow detected, showing hint');
+                    } else {
+                        if (toggleBtn) {
+                            toggleBtn.classList.remove('overflow-hint');
+                        }
+                        centerContainer.classList.remove('overflowing');
+                    }
+                }
+            }
+
+            // Check overflow on load and resize
+            setTimeout(() => checkHeaderOverflow(), 500);
+            window.addEventListener('resize', checkHeaderOverflow);
+
+            // ===== LISTENER UNTUK UPDATE DARI VISIBILITY MENU =====
+            // MOVED INSIDE initializeVisibilityToggleSystem() for proper scope
+            ipcRenderer.on('update-visibility-settings', (event, settings) => {
+                console.log('╔═══════════════════════════════════════════╗');
+                console.log('║  [Main HTML] 📨 RECEIVED IPC EVENT       ║');
+                console.log('╚═══════════════════════════════════════════╝');
+                console.log('[Main HTML] Event: update-visibility-settings');
+                console.log('[Main HTML] Settings:', settings);
+                console.log('[Main HTML] 🚀 Applying settings with smooth transition...');
+                applyVisibilitySettings(settings);
+                console.log('[Main HTML] ✅ Settings applied successfully!');
+                console.log('═══════════════════════════════════════════\n');
+            });
+
+            // ===== LISTENER UNTUK MENU CLOSED (untuk reset button state) =====
+            ipcRenderer.on('visibility-menu-closed', () => {
+                console.log('[Main HTML] Menu closed, resetting button state');
+                isMenuOpen = false;
+                const toggleBtn = document.getElementById('toggle-visibility-btn');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.querySelector('i').classList.remove('fa-eye-slash');
+                    toggleBtn.querySelector('i').classList.add('fa-eye');
+                }
+            });
+
+            // ===== LISTENER UNTUK MENU OPENED (sinkronisasi saat auto-open) =====
+            ipcRenderer.on('visibility-menu-opened', () => {
+                console.log('[Main HTML] Menu opened, updating button state');
+                isMenuOpen = true;
+                const toggleBtn = document.getElementById('toggle-visibility-btn');
+                if (toggleBtn) {
+                    toggleBtn.classList.add('active');
+                    toggleBtn.querySelector('i').classList.remove('fa-eye');
+                    toggleBtn.querySelector('i').classList.add('fa-eye-slash');
+                }
+            });
+
+            // ===== LISTENER UNTUK SUBSCRIPTION UPDATE DARI FIREBASE =====
+            ipcRenderer.on('subscription-updated', (event, data) => {
+                console.log('[Main HTML] 🔄 Subscription updated from Firebase:', data);
+
+                // Update timer display
+                const timerDisplay = document.getElementById('time-left-display');
+                if (timerDisplay && data.expiresAt) {
+                    const expiresDate = new Date(data.expiresAt);
+                    const now = new Date();
+                    const diffMs = expiresDate - now;
+
+                    if (diffMs > 0) {
+                        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+                        timerDisplay.textContent = `${days}d ${hours}h`;
+                        timerDisplay.style.color = days > 7 ? '#4ade80' : '#fbbf24';
+
+                        console.log('[Main HTML] ✅ Timer display updated to:', timerDisplay.textContent);
+                    }
+                }
+
+                // Flash effect to show update
+                const expirationContainer = document.getElementById('expiration-container');
+                if (expirationContainer) {
+                    expirationContainer.style.animation = 'pulse 0.5s ease-in-out 3';
+                    setTimeout(() => {
+                        expirationContainer.style.animation = '';
+                    }, 1500);
+                }
+            });
+
+            // ===== LISTENER UNTUK SHOW NOTIFICATION =====
+            ipcRenderer.on('show-notification', (event, data) => {
+                console.log('[Main HTML] 📢 Showing notification:', data);
+
+                // Create toast notification
+                const toast = document.createElement('div');
+                toast.className = `toast-notification toast-${data.type || 'info'}`;
+                toast.innerHTML = `
+                    <i class="fas ${data.type === 'success' ? 'fa-check-circle' : data.type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <div class="toast-content">
+                        <strong>${data.title || 'Notification'}</strong>
+                        <p>${data.message}</p>
+                    </div>
+                `;
+
+                // Add styles if not exist
+                if (!document.getElementById('toast-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'toast-styles';
+                    style.textContent = `
+                        .toast-notification {
+                            position: fixed;
+                            top: 60px;
+                            right: 20px;
+                            padding: 12px 20px;
+                            border-radius: 8px;
+                            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+                            color: white;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                            animation: slideIn 0.3s ease, fadeOut 0.3s ease 4.7s;
+                            z-index: 10000;
+                            max-width: 350px;
+                        }
+                        .toast-notification i { font-size: 24px; }
+                        .toast-success i { color: #4ade80; }
+                        .toast-error i { color: #f87171; }
+                        .toast-info i { color: #60a5fa; }
+                        .toast-content strong { display: block; margin-bottom: 4px; }
+                        .toast-content p { margin: 0; font-size: 13px; opacity: 0.9; }
+                        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+                        @keyframes fadeOut { to { opacity: 0; transform: translateX(50px); } }
+                        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                document.body.appendChild(toast);
+
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 5000);
+            });
+
+            console.log('[Visibility Toggle] Initialization complete');
+        }</script></body></html>

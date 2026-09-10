@@ -1,0 +1,52 @@
+{
+  "name": "captchakings-captchatyper",
+  "version": "2.4.9",
+  "version2": "0.5.0",
+  "description": "CaptchaTyper Panel",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "pkg": {
+    "scripts": [
+      "proxy.js",
+      "api-client.js",
+      "api-client-main.js",
+      "force-inject.js"
+    ]
+  },
+  "dependencies": {
+    "@mdi/font": "^3.6.95",
+    "axios": "^1.10.0",
+    "cacheable-lookup": "^7.0.0",
+    "cycletls": "^1.0.27",
+    "electron-simple-updater": "^2.0.10",
+    "express": "^4.18.2",
+    "firebase": "^11.10.0",
+    "fs-extra": "^11.3.0",
+    "glob": "^11.0.3",
+    "html2canvas": "^1.4.1",
+    "https-proxy-agent": "^7.0.6",
+    "jsdom": "^16.7.0",
+    "net": "^1.0.2",
+    "node-fetch": "^2.7.0",
+    "node-machine-id": "^1.1.12",
+    "nodemailer": "^7.0.5",
+    "omggif": "^1.0.10",
+    "opn": "^6.0.0",
+    "puppeteer": "^24.15.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "random-int": "^2.0.1",
+    "random-item": "^3.0.0",
+    "request": "^2.88.2",
+    "tangerine": "^1.6.0",
+    "vue-round-slider": "^1.0.1",
+    "vue-simple-alert": "^1.1.1",
+    "websocket": "^1.0.35",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "electron": "^41.5.0"
+  }
+}

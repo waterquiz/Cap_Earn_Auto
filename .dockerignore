@@ -1,0 +1,14 @@
+node_modules
+.git
+temp_videos
+scratch
+solver.exe
+*.bat
+*.mp3
+extensions
+proxies.txt
+response.json
+daily-task-data.json
+app2
+view
+template

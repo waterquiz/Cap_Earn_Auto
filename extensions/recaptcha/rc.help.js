@@ -1,0 +1,1 @@
+// Legacy script disabled. All solving logic is now handled by force-inject.js in the Main Process to bypass CSP and CORS restrictions natively.

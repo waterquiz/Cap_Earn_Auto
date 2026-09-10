@@ -1,0 +1,117 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>GeeTest</title>
+        <style>
+            html,body{ overflow: hidden !important; }
+            .column
+            {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100%;
+                text-align: center;
+            }
+            .row
+            {
+                display: flex;
+                justify-content: center;
+                flex-direction: row;
+            }
+        </style>
+        <script>
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            const generateCaptcha = () => {
+                detectActive();
+                if(!initGeetest)
+                    return;
+                
+                let Gt = '';
+                let ApiServer = '';
+                let Challenge = '';
+
+                Gt = `${Gt}`;
+                ApiServer = `${ApiServer}`;
+                Challenge = `${Challenge}`;
+
+                let captchaStatus = document.getElementById('captcha-status-message');
+                captchaStatus.setAttribute('class', 'text-info');
+                captchaStatus.innerHTML = 'Loading Captcha &hellip;<br>';
+                captchaStatus.style.display = "inline";
+                let obj = {
+                    gt: Gt,
+                    challenge: Challenge,
+                    product: 'float',
+                    offline: ${Offline},
+                    new_captcha: ${NewCaptcha},
+                    lang: window.navigator.language.slice(0, 2)
+                };
+                if(ApiServer)
+                    obj['api_server'] = ApiServer;
+                initGeetest(obj, function (captchaObj) {
+                    captchaObj.onReady(function () {
+                        captchaStatus.style.display = 'none';
+                        captchaStatus.setAttribute('class', 'text-info');
+                        console.log('frame-onload');
+                    });
+                    captchaObj.appendTo(document.getElementById('captcha-box'));
+                    captchaObj.onSuccess(() => {
+                        let res = {}; 
+                        [
+                            'geetest_challenge',
+                            'geetest_validate',
+                            'geetest_seccode'
+                        ].forEach(key => {
+                            res[key] = document.querySelector(`[name='${key}']`).value;
+                        });
+                        console.log('token:'+JSON.stringify(res));
+                    });
+                });
+            };
+            const detectActive = () => {
+                const attribKey = 'mt_inj';
+                const btnSelector = '.geetest_holder.geetest_wind';
+                const boxSelector = '.geetest_fullpage_click_box';
+                setInterval(() => {
+                    const btn = document.querySelector(btnSelector);
+                    if(btn && !btn.getAttribute(attribKey))
+                    {
+                        btn.setAttribute(attribKey,'true');
+                        btn.click();
+                    }
+                    const box = document.querySelector(boxSelector);
+                    if(box && !box.getAttribute(attribKey))
+                    {
+                        console.log('detect-active-trigger')
+                        box.setAttribute(attribKey,'true');
+                        box.addEventListener('mousemove',() => {
+                            console.log('detect-active');
+                        });
+                    }
+                },1000);
+            };
+        </script>
+    </head>
+    <body>
+        <div class="column">
+            <div class="row">
+                <div id="captcha-box">
+                    <span
+                        id="captcha-status-message"
+                        class="text-info"
+                        style="display: none;"
+                    >Loading Captcha…<br></span>
+                </div>
+            </div>
+        </div>
+        
+        <script
+            src="https://static.geetest.com/static/tools/gt.js"
+            onerror="scriptLoadError()"
+            onabort="scriptLoadError()"
+            onload="generateCaptcha()"
+        ></script>
+    </body>
+</html>

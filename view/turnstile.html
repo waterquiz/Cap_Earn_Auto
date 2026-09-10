@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>Turnstile</title>
+    <script>
+      const onloadTurnstileCallback = () => {
+        turnstile.render('.captcha', {
+          sitekey: `${SiteKey}`,
+          callback: (token) => console.log('token:'+token),
+          action: `${Action}`,
+          cData: `${Data}`
+        })
+        console.log('frame-onload')
+      }
+    </script>
+    <script
+      type="text/javascript"
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+      onload="onloadTurnstileCallback()"
+      async=""
+      defer="">
+    </script>
+  </head>
+  <body>
+    <div class="captcha"></div>
+  </body>
+</html>

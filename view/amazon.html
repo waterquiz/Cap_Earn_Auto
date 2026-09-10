@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Human Verification</title>
+  <style>
+    body {
+      font-family: "Arial";
+    }
+
+    .captcha-container {
+      background-color: white;
+    }
+
+    .b {
+      height: auto;
+    }
+  </style>
+  <script type="text/javascript">
+    window.awsWafCookieDomainList = [];
+  </script>
+  <script src="${challenge_script}"></script>
+  <script src="${captcha_script}"></script>
+  <!-- HAPUS: CSS dan UI helpers yang bermasalah -->
+</head>
+
+<body class="b">
+  <div id="captcha-container" class="captcha-container"></div>
+  <script type="text/javascript">
+    window.addEventListener("load", function () {
+      console.log('frame-onload')
+      const container = document.getElementById("captcha-container");
+      CaptchaScript.renderCaptcha(container, async voucher => {
+        const token = await AwsWafIntegration.getToken()
+        console.log('token:' + JSON.stringify({
+          captcha_voucher: voucher,
+          existing_token: token
+        }))
+      },
+        {
+          "key": "${SiteKey}",
+          "iv": "${Iv}",
+          "context": "${Context}",
+          onPuzzleTimeout: () => console.log('captcha-expired'),
+          onError: () => console.log('captcha-load-error'),
+          dynamicWidth: true,
+          skipTitle: true
+        });
+    });
+  </script>
+</body>
+
+</html>

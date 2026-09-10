@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>${Title}</title>
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            Data = '${Data}';
+            function setupEnforcement(myEnforcement) {
+                myEnforcement.setConfig({
+                    data: Data ? JSON.parse(Data) : null,
+                    language: navigator.language,
+                    onCompleted: (response) => {
+                        console.log(`${Token}:${response.token}`)
+                    },
+                    onReady: () => {
+                        myEnforcement.run();
+                        console.log('frame-onload');
+                    }
+                });
+            }
+        </script>
+        <script
+            src="${Surl}/v2/${Publickey}/api.js"
+            async="" defer=""
+            data-callback="setupEnforcement"
+        ></script>
+    </head>
+    <body>
+    </body>
+</html>

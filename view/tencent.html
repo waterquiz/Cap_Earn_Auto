@@ -1,0 +1,32 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <script src="${CaptchaScript}" async defer></script>
+</head>
+
+<body>
+  <div></div>
+  <script>
+    function callback(res) {
+      console.log('token:' + JSON.stringify(res));
+    }
+
+    function loadErrorCallback() {
+      console.log('frame-load-error');
+    }
+
+    window.onload = function () {
+      try {
+        var captcha = new TencentCaptcha('${AppId}', callback, { userLanguage: navigator.language });
+        captcha.show();
+        console.log('frame-onload');
+      } catch (error) {
+        console.log(error)
+        loadErrorCallback();
+      }
+    }
+  </script>
+</body>
+
+</html>

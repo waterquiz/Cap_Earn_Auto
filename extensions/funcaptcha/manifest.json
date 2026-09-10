@@ -1,0 +1,37 @@
+{
+	"name": "recaptcha",
+	"version": "0.0.1",
+	"manifest_version": 3,
+	"content_scripts": [
+		{
+		  "matches": [
+			  "https://*/fc/apps/canvas/*",
+			  "https://*/fc/api/nojs/*"
+			],
+		  "js": [
+			  "fc.help.js"
+		  ],
+		  "run_at": "document_end",
+		  "all_frames": true
+		},
+		{
+			"matches": [
+				"https://*/fc/gc/*"
+			],
+			"js": [
+				"fc.audio.js",
+        "fc.body.width.js"
+			],
+			"run_at": "document_end",
+		  	"all_frames": true
+		},
+		{
+			"matches": ["<all_urls>"],
+			"js": [
+				"screen.js"
+		  	],
+		  "run_at": "document_end",
+		  "all_frames": true
+		}
+	]
+}

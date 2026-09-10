@@ -1,0 +1,268 @@
+/* Amazon Solver Styles */
+
+/* Container untuk Amazon captcha */
+.amazon-captcha-container {
+    position: relative;
+    min-height: 400px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Overlay khusus untuk Amazon */
+.amazon-solver-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.9), rgba(0, 255, 255, 0.9));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+.amazon-solver-content {
+    text-align: center;
+    padding: 30px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.amazon-solver-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #00ffff;
+    border-radius: 50%;
+    animation: amazon-spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes amazon-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.amazon-solver-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 1px;
+}
+
+.amazon-solver-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    margin: 0;
+    font-weight: 300;
+}
+
+.amazon-solver-message {
+    font-size: 16px;
+    margin-top: 15px;
+    font-weight: 500;
+    min-height: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Success state */
+.amazon-solver-overlay.success {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(76, 175, 80, 0.9));
+}
+
+.amazon-solver-overlay.success .amazon-solver-spinner {
+    border-top-color: #4caf50;
+    animation: amazon-success-pulse 0.6s ease-in-out;
+}
+
+@keyframes amazon-success-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Error state */
+.amazon-solver-overlay.error {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(244, 67, 54, 0.9));
+}
+
+.amazon-solver-overlay.error .amazon-solver-spinner {
+    border-top-color: #f44336;
+    animation: amazon-error-shake 0.5s ease-in-out;
+}
+
+@keyframes amazon-error-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Amazon captcha specific elements */
+.amzn-captcha-verify-button {
+    transition: all 0.3s ease;
+}
+
+.amzn-captcha-verify-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Input styling */
+input[name="amzn-captcha-solution"] {
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input[name="amzn-captcha-solution"]:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Loading animation untuk puzzle */
+.amazon-puzzle-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.amazon-puzzle-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: amazon-shimmer 1.5s infinite;
+}
+
+@keyframes amazon-shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .amazon-solver-content {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .amazon-solver-title {
+        font-size: 20px;
+    }
+    
+    .amazon-solver-message {
+        font-size: 14px;
+    }
+    
+    .amazon-solver-spinner {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .amazon-captcha-container {
+        background: #2c2c2c;
+    }
+    
+    .amazon-solver-overlay {
+        background: linear-gradient(135deg, rgba(0, 123, 255, 0.8), rgba(0, 255, 255, 0.8));
+    }
+    
+    input[name="amzn-captcha-solution"] {
+        background: #3c3c3c;
+        color: #fff;
+        border-color: #555;
+    }
+    
+    input[name="amzn-captcha-solution"]:focus {
+        border-color: #00ffff;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .amazon-solver-overlay {
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #fff;
+    }
+    
+    .amazon-solver-content {
+        background: rgba(255, 255, 255, 0.95);
+        color: #000;
+        border: 2px solid #000;
+    }
+    
+    .amazon-solver-spinner {
+        border-color: #000;
+        border-top-color: #007bff;
+    }
+}
+
+/* Accessibility */
+.amazon-solver-overlay:focus {
+    outline: 3px solid #007bff;
+    outline-offset: 2px;
+}
+
+.amazon-solver-content:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .amazon-solver-overlay {
+        display: none !important;
+    }
+}
+
+/* Animation for token ready state */
+.amazon-solver-overlay.token-ready .amazon-solver-spinner {
+    animation: amazon-token-ready 0.8s ease-in-out;
+}
+
+@keyframes amazon-token-ready {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+/* Progress indicator */
+.amazon-solver-progress {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    margin-top: 15px;
+    overflow: hidden;
+}
+
+.amazon-solver-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00ffff, #007bff);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+    animation: amazon-progress-pulse 2s ease-in-out infinite;
+}
+
+@keyframes amazon-progress-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}

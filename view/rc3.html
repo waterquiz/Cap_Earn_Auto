@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <script>
+            let Action = '';
+            let GoogleKey = '';
+
+            Action = `${Action}`;
+            GoogleKey = `${GoogleKey}`;
+
+            const scriptOnLoad = () =>
+            {
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(GoogleKey, {action: Action}).then(function(token) {
+                        if(!token)
+                            return console.log('captcha-load-error')
+                        console.log(`token:${token}`)
+                    });
+                });
+            };
+            const scriptLoadError = () => {
+                console.log('frame-load-error')
+            }
+        </script>
+        <script
+            src="https://${Domain}/recaptcha/api.js?render=${GoogleKey}"
+            onerror="scriptLoadError()"
+            onabort="scriptLoadError()"
+            onload="scriptOnLoad()"
+        ></script>
+    </head>
+    <body>
+
+    </body>
+</html>

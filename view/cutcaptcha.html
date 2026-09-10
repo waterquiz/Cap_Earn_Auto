@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<head>
+    <script type="text/javascript">var _DOMAIN = location.origin;</script>
+</head>
+
+<body>
+    <div id="page">
+
+        <form action method="post" id="cform">
+            <div class="placeholder">
+                <script type="text/javascript">
+                    var CUTCAPTCHA_MISERY_KEY = "${MiseryKey}";
+                    var capResponseCallback = function (token) { console.log('token:'+token) }
+                </script>
+                <script src="https://v2.cutcaptcha.net/captcha/${ApiKey}.js"></script>
+                <div id="puzzle-captcha" aria-style="mobile">
+                    <input id="cap_token" type="hidden" value="" name="cap_token">
+                </div>
+                <script>
+                    console.log('frame-onload')
+                </script>
+            </div>
+        </form>
+    </div>
+
+</body>
+
+</html>

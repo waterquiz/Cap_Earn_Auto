@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            var submitCallback = function (response) { document.getElementById('captcha-form').submit(); };
+            
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            const OnRcErrorCallback = () => {
+                console.log('captcha-load-error')
+            };
+            var onloadCallback = function() {
+                grecaptcha.ready(function () {
+                    grecaptcha.execute()
+                })
+            }
+
+
+            function detectActive() {
+                const attribKey = 'mt_inj';
+                let IsClick = false;
+                let CountImgClick = 0;
+                let IsOnload = false;
+
+                const int = setInterval(function () {
+                    const tx = document.getElementById('g-recaptcha-response');
+                    if (!tx || !tx.value)
+                        return;
+                    console.log('token:' + tx.value);
+                    clearInterval(int);
+                }, 1000);
+            }
+        </script>
+        <script
+            src="https://${Domain}/recaptcha/api.js?onload=onloadCallback&render=onload"
+            onerror="scriptLoadError()"
+            onabort="scriptLoadError()"
+            onload="detectActive()"
+        ></script>
+    </head>
+    <body>
+        <div
+            class="g-recaptcha"
+            id="recaptcha"
+            data-callback="submitCallback"
+            data-error-callback="OnRcErrorCallback"
+            style="position: fixed;left: 0;top:0;"
+            data-sitekey="${GoogleKey}"
+            data-size="invisible"
+        ></div>
+    </body>
+</html>

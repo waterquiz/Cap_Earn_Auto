@@ -1,0 +1,25 @@
+{
+	"name": "recaptcha",
+	"version": "0.0.1",
+	"manifest_version": 3,
+	"content_scripts": [
+		{
+		  "matches": ["https://newassets.hcaptcha.com/captcha/*/*/static/hcaptcha.html*"],
+		  "js": [
+			  "verifyClick.js",
+			  "button.js"
+		  ],
+		  "run_at": "document_end",
+		  "all_frames": true
+		},
+		{
+		  "matches": ["https://newassets.hcaptcha.com/captcha/*/*/static/hcaptcha.html*"],
+		  "js": [
+			  "verifyClick.js",
+			  "hc.help.js"
+		  ],
+		  "run_at": "document_end",
+		  "all_frames": true
+		}
+	]
+}

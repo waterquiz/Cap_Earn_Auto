@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        overflow: hidden !important;
+      }
+      .verify-button {
+        align-items: center;
+        background: rgb(38, 128, 89);
+        border: none;
+        border-radius: 4px;
+        color: rgb(255, 255, 255);
+        cursor: pointer;
+        display: flex;
+        font-family: silka,Poppins,sans-serif;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 500;
+        justify-content: flex-end;
+        line-height: 16px;
+        padding: 7px 15px;
+        position: absolute;
+        right: 5px;
+        bottom: 5px;
+      }
+    </style>
+    <script>
+      const scriptLoadError = () => {
+        console.log('frame-load-error');
+      };
+    </script>
+  </head>
+  <body>
+    <div>
+      <form>
+        <div id="${divId}"></div>
+        <script src="https://api.leminnow.com/captcha/v1/cropped/${CaptchaKey}/js"
+          onerror="scriptLoadError()"
+          onabort="scriptLoadError()"
+        ></script>
+      </form>
+    </div>
+    <script>
+      const interval = setInterval(() => {
+        const captcha = leminCroppedCaptcha.getCaptcha()
+        if(!captcha)
+          return
+        clearInterval(interval)
+        try {
+          captcha.onVerify(is => {
+            if(!is)
+              return 
+            console.log(`token:${JSON.stringify(captcha.getCaptchaValue())}`)
+          })
+        }catch(e) {
+          const interval = setInterval(() => {
+            const captchaValues = window.leminCroppedCaptcha
+              .getCaptcha()
+              .getCaptchaValue();
+            if(captchaValues.answer && captchaValues.answer != "null") {
+              console.dir(captchaValues)
+              clearInterval(interval)
+              
+              const btn = document.createElement('button')
+              btn.classList.add('verify-button')
+              btn.type = 'button'
+              btn.innerText = 'Verify'
+              btn.onclick = () => {
+                console.log(`token:${JSON.stringify(captchaValues)}`)
+              }
+
+              document.querySelector('.piece-area').appendChild(btn)
+            }
+          })
+        }
+        captcha.onLoad(() => {
+          console.log('frame-onload')
+        })
+        console.dir(captcha)
+
+        document.querySelector('.lemin-captcha-checkbox').click()
+      }, 500)
+      
+    </script>
+  </body>
+</html>

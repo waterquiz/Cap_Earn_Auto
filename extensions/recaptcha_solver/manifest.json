@@ -1,0 +1,74 @@
+{
+  "manifest_version": 3,
+  "name": "JA CAPTCHA: reCAPTCHA v2 Image Solver",
+  "version": "1.0.9",
+  "description": "Automatically Solve reCAPTCHA v2 Image Challenge Using AI.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "JA-CAPTCHA",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "*://*.google.com/recaptcha/*",
+    "*://*.recaptcha.net/recaptcha/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "dist/*",
+        "models/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.google.com/recaptcha/api2/*",
+        "*://*.google.com/recaptcha/enterprise/*",
+        "*://*.recaptcha.net/recaptcha/api2/*",
+        "*://*.recaptcha.net/recaptcha/enterprise/*"
+      ],
+      "js": [
+        "js/recaptcha.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true,
+      "match_about_blank": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "js/recaptcha-visibility.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": true,
+      "match_about_blank": false
+    }
+  ]
+}

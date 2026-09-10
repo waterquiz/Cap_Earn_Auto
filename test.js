@@ -1,0 +1,1 @@
+const fs = require("fs"); const content = fs.readFileSync("main.js", "utf8"); const matches = content.match(/require\([^\)]+\)/g); console.log(matches);

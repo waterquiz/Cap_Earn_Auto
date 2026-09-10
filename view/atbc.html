@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script
+      src="https://cdn.aisecurius.com/ctu-group/captcha-ui/v5/index.js"
+      crossorigin="anonymous"
+      id="as-captcha-script"
+    ></script>
+  </head>
+  <body>
+    <div id="demo" style="background: whitesmoke;"></div>
+    <script>
+      var myCaptcha = as.Captcha(document.getElementById("demo"), {
+        appId: "${AppId}",
+        apiServer: "${ApiServer}",
+        success: function (token) {
+          console.log("token:", token);
+        },
+      });
+      myCaptcha.on('ready', function () {
+        console.log('frame-onload')
+      })
+      myCaptcha.on('loadFail', function(){
+        console.log('captcha-load-error')
+      })
+    </script>
+  </body>
+</html>

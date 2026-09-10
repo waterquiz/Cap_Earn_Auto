@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+        </style>
+        <script>
+            var OnSubmitHCaptcha = (token) => {
+                console.log(JSON.stringify({
+                    token,
+                    useragent: navigator.userAgent,
+                    respKey: window.hcaptcha.getRespKey()
+                }))
+            };
+            var OnErrorCallback = () => {
+                console.log('frame-load-error');
+            };
+            
+            // Handle WebGPU errors
+            window.addEventListener('error', (event) => {
+                if (event.message && event.message.includes('WebGPU')) {
+                    console.log('WebGPU error detected, continuing with fallback...');
+                    event.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Disable WebGPU globally
+            if (navigator.gpu) {
+                navigator.gpu = undefined;
+            }
+            
+            // Override WebGPU context creation
+            if (window.HTMLCanvasElement) {
+                const originalGetContext = HTMLCanvasElement.prototype.getContext;
+                HTMLCanvasElement.prototype.getContext = function(contextType, contextAttributes) {
+                    if (contextType === 'webgpu') {
+                        console.log('WebGPU context creation blocked');
+                        return null;
+                    }
+                    return originalGetContext.call(this, contextType, contextAttributes);
+                };
+            }
+            const scriptLoadError = () => {
+                //console.log('frame-load-error');
+            };
+            const scriptOnload = async () => {
+                await detectFrame();
+            };
+            const detectFrame = () => {
+                return new Promise(ok => {
+                    const int = setInterval(() => {
+                        const frame  = document.querySelector('iframe');
+                        if(!frame)
+                            return;
+                        clearInterval(int);
+                        ok(frame);
+                    },100);
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <form>
+            <script
+                src="https://js.hcaptcha.com/1/api.js?hl=id"
+                onerror="scriptLoadError()"
+                onabort="scriptLoadError()"
+                onload="scriptOnload()"
+            ></script>
+            <div
+                class="h-captcha"
+                data-sitekey="${SiteKey}"
+                data-callback="OnSubmitHCaptcha"
+                data-error-callback="OnErrorCallback"
+                data-hl="id"
+                style="position: fixed;left: 0;top:0;"
+            >
+            </div>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <style>
+            html,body{ overflow: hidden !important; }
+            
+        </style>
+        <script>
+            const scriptLoadError = () => {
+                console.log('frame-load-error');
+            };
+            
+            const btn = document.createElement('button')
+            btn.classList.add('button')
+            btn.innerHTML = 'Done'
+            btn.onclick = () => {
+                let capy = {
+                    captchakey: document.querySelector("input[name='capy_captchakey']").value,
+                    challengekey: document.querySelector("input[name='capy_challengekey']").value,
+                    answer: document.querySelector("input[name='capy_answer']").value
+                }
+                if (capy.answer === "null")
+                    console.log('Captcha is not solved yet!');
+                else
+                    console.log('token:'+JSON.stringify(capy));
+            }
+
+            const interval = setInterval(() => {
+                const imgs = document.querySelectorAll('img');
+                if(!imgs.length)
+                    return;
+                clearInterval(interval);
+                console.log('frame-onload');
+
+                document.body.appendChild(btn);
+                
+            },2000);
+        </script>
+    </head>
+    <body>
+        <div>
+            <script
+                src="${Surl}/${Version}/get_js/?k=${CaptchaKey}"
+                onerror="scriptLoadError()"
+                onabort="scriptLoadError()"
+            ></script>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,2611 @@
+<!doctype html><html><head><meta charset="UTF-8"><title>Manage Header Visibility</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><style>:root {
+      --bg-color: #0f0f1b;
+      --title-bar-color: #1a1a2e;
+      --primary-glow: #00ffff;
+      --primary-glow-dim: rgba(0, 255, 255, 0.3);
+      --accent-gold: #ffd700;
+      --accent-silver: #c0c0c0;
+      --accent-bronze: #cd7f32;
+      --border-color: rgba(0, 255, 255, 0.2);
+      --text-color: #d1d5db;
+      --text-muted: #8892b0;
+      --danger: #ff4757;
+      --success: #2ed573;
+      --warning: #ffa502;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #1a1a2e !important;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-color);
+      display: flex;
+      align-items: stretch;
+    }
+
+    .visibility-menu-container {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      position: relative;
+      overflow: hidden;
+      margin: 0;
+      border-left: 2px solid rgba(0, 255, 255, 0.15);
+    }
+
+    /* ===== RESIZE HANDLE (sisi kiri sidebar) ===== */
+    .resize-handle {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 1000;
+      background: transparent;
+      transition: background 0.2s;
+    }
+
+    .resize-handle:hover,
+    .resize-handle.active {
+      background: linear-gradient(180deg, rgba(0, 255, 255, 0.4), rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.4));
+    }
+
+    .resize-handle::after {
+      content: '';
+      position: absolute;
+      left: 1px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 40px;
+      border-radius: 2px;
+      background: rgba(0, 255, 255, 0.2);
+      transition: background 0.2s;
+    }
+
+    .resize-handle:hover::after,
+    .resize-handle.active::after {
+      background: rgba(0, 255, 255, 0.6);
+    }
+
+
+
+
+    .visibility-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+      background: rgba(0, 255, 255, 0.05);
+      user-select: none;
+    }
+
+    .visibility-menu-header:hover {
+      background: rgba(0, 255, 255, 0.08);
+    }
+
+    .visibility-menu-header h3 {
+      margin: 0;
+      font-size: 15px;
+      color: var(--primary-glow);
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      pointer-events: none;
+    }
+
+    .visibility-menu-header h3::before {
+      content: "⋮⋮";
+      font-size: 16px;
+      opacity: 0.3;
+      margin-right: 8px;
+      color: var(--primary-glow);
+    }
+
+    .close-menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 5px 8px;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .close-menu-btn:hover {
+      color: #ff4757;
+      background: rgba(255, 71, 87, 0.1);
+      transform: rotate(90deg);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .pin-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 5px 8px;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      -webkit-app-region: no-drag;
+    }
+
+    .pin-btn:hover {
+      color: var(--primary-glow);
+      background: rgba(0, 255, 255, 0.1);
+    }
+
+    .pin-btn.active {
+      color: var(--accent-gold);
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    }
+
+    .pin-btn.active:hover {
+      color: var(--accent-gold);
+      background: rgba(255, 215, 0, 0.1);
+    }
+
+    /* ===== TAB NAVIGATION ===== */
+    .tab-navigation {
+      display: flex;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0;
+      overflow-x: auto;
+    }
+
+    .tab-navigation::-webkit-scrollbar {
+      height: 0;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-color);
+      background: rgba(0, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--primary-glow);
+      border-bottom-color: var(--primary-glow);
+      background: rgba(0, 255, 255, 0.08);
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+    }
+
+    .tab-btn i {
+      font-size: 12px;
+    }
+
+    .tab-badge {
+      background: var(--danger);
+      color: white;
+      font-size: 8px;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-weight: bold;
+      animation: pulse-badge 2s infinite;
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ===== TAB CONTENT ===== */
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .tab-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-content::-webkit-scrollbar-thumb {
+      background: var(--primary-glow-dim);
+      border-radius: 3px;
+    }
+
+    /* ===== VISIBILITY TAB (existing) ===== */
+    .visibility-status-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 15px 20px;
+      background: rgba(0, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    }
+
+    .status-column { display: flex; flex-direction: column; gap: 8px; }
+    .visible-column .status-header { color: var(--primary-glow); }
+    .hidden-column .status-header { color: #ff6b6b; }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .status-list {
+      list-style: none;
+      padding: 8px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 11px;
+      max-height: 120px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .status-list::-webkit-scrollbar { width: 5px; }
+    .status-list::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    .status-list::-webkit-scrollbar-thumb { background: var(--primary-glow); border-radius: 3px; }
+
+    .status-list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+    }
+
+    .visible-column .status-list li { border-left: 2px solid var(--primary-glow); }
+    .hidden-column .status-list li { border-left: 2px solid #ff6b6b; }
+    .status-dot { font-size: 6px; }
+    .visible-column .status-dot { color: var(--primary-glow); }
+    .hidden-column .status-dot { color: #ff6b6b; }
+
+    .empty-message {
+      color: var(--text-muted);
+      font-style: italic;
+      opacity: 0.7;
+      border-left: 2px solid var(--text-muted) !important;
+    }
+
+    .visibility-menu-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(0, 255, 255, 0.3), transparent);
+    }
+
+    .visibility-section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-glow);
+      margin-bottom: 10px;
+      padding: 10px 0 5px 0;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    }
+
+    .visibility-menu-content {
+      padding: 15px 20px;
+    }
+
+    .visibility-option {
+      margin-bottom: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .visibility-option:hover {
+      background: rgba(0, 255, 255, 0.05);
+      transform: translateX(3px);
+    }
+
+    .visibility-option label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .visibility-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+      cursor: pointer;
+      accent-color: var(--primary-glow);
+    }
+
+    .visibility-option span {
+      color: var(--text-color);
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .visibility-option input[type="checkbox"]:checked+span {
+      color: var(--primary-glow);
+      font-weight: 500;
+    }
+
+    /* ===== FOOTER ===== */
+    .visibility-menu-footer {
+      padding: 12px 20px;
+      border-top: 1px solid rgba(0, 255, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 255, 255, 0.02);
+      border-radius: 0 0 8px 8px;
+    }
+
+    .reset-btn {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.3));
+      border: 1px solid #ff6b6b;
+      border-radius: 6px;
+      padding: 6px 14px;
+      color: #ff6b6b;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reset-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.4));
+      box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .info-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .info-text i {
+      color: var(--primary-glow);
+    }
+
+    /* ===== LEADERBOARD TAB ===== */
+    .leaderboard-container {
+      padding: 15px 20px;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .leaderboard-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent-gold);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .leaderboard-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .leaderboard-toggle-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 34px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .toggle-switch.active {
+      background: rgba(0, 255, 255, 0.3);
+      border-color: var(--primary-glow);
+    }
+
+    .toggle-switch .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+
+    .toggle-switch.active .toggle-thumb {
+      left: 18px;
+      background: var(--primary-glow);
+      box-shadow: 0 0 6px var(--primary-glow);
+    }
+
+    /* Period Filter */
+    .period-filter {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .period-btn {
+      padding: 5px 10px;
+      border: 1px solid rgba(0, 255, 255, 0.15);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-muted);
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .period-btn:hover {
+      border-color: var(--primary-glow-dim);
+      color: var(--text-color);
+    }
+
+    .period-btn.active {
+      background: rgba(0, 255, 255, 0.15);
+      border-color: var(--primary-glow);
+      color: var(--primary-glow);
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+    }
+
+    /* Leaderboard Table */
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 4px;
+    }
+
+    .leaderboard-table th {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .leaderboard-table th:last-child {
+      text-align: right;
+    }
+
+    .leaderboard-row {
+      background: rgba(255, 255, 255, 0.03);
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .leaderboard-row:hover {
+      background: rgba(0, 255, 255, 0.06);
+      transform: translateX(2px);
+    }
+
+    .leaderboard-row.is-me {
+      background: rgba(0, 255, 255, 0.1);
+      border-left: 3px solid var(--primary-glow);
+    }
+
+    .leaderboard-row td {
+      padding: 8px;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    .rank-cell {
+      width: 35px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .rank-1 { color: var(--accent-gold); text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); font-size: 14px; }
+    .rank-2 { color: var(--accent-silver); text-shadow: 0 0 6px rgba(192, 192, 192, 0.5); }
+    .rank-3 { color: var(--accent-bronze); text-shadow: 0 0 6px rgba(205, 127, 50, 0.5); }
+
+    .rank-medal { font-size: 14px; }
+
+    .email-cell {
+      color: var(--text-color);
+      font-size: 11px;
+      font-family: 'Consolas', monospace;
+    }
+
+    .earning-cell {
+      text-align: right;
+      font-weight: bold;
+      color: var(--success);
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+    }
+
+    .status-online {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      margin-right: 4px;
+    }
+
+    .status-offline {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    .leaderboard-empty {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-muted);
+    }
+
+    .leaderboard-empty i {
+      font-size: 32px;
+      margin-bottom: 10px;
+      display: block;
+      color: rgba(255, 215, 0, 0.3);
+    }
+
+    .leaderboard-disabled {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-muted);
+    }
+
+    .leaderboard-disabled i {
+      font-size: 28px;
+      margin-bottom: 10px;
+      display: block;
+      opacity: 0.3;
+    }
+
+    .show-more-btn {
+      width: 100%;
+      padding: 8px;
+      border: 1px dashed var(--border-color);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--primary-glow);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .show-more-btn:hover {
+      background: rgba(0, 255, 255, 0.05);
+      border-color: var(--primary-glow);
+    }
+
+    .leaderboard-refresh-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .refresh-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 4px;
+      animation: pulse-badge 2s infinite;
+    }
+
+    /* ===== TARGET HARIAN ===== */
+    .target-container {
+      padding: 15px 20px;
+    }
+
+    .target-section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-glow);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .target-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+
+    .target-input-group label {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .target-input {
+      flex: 1;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--primary-glow);
+      font-size: 14px;
+      font-weight: bold;
+      font-family: 'Consolas', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .target-input:focus {
+      border-color: var(--primary-glow);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+    }
+
+    .target-save-btn {
+      padding: 8px 14px;
+      background: rgba(0, 255, 255, 0.15);
+      border: 1px solid var(--primary-glow);
+      border-radius: 6px;
+      color: var(--primary-glow);
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .target-save-btn:hover {
+      background: rgba(0, 255, 255, 0.25);
+      box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+    }
+
+    .target-progress-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .target-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .target-progress-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .target-progress-value {
+      font-size: 18px;
+      font-weight: bold;
+      font-family: 'Consolas', monospace;
+    }
+
+    .target-progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .target-progress-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.5s ease, background 0.3s;
+      background: linear-gradient(90deg, var(--primary-glow), #2ed573);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    }
+
+    .target-remaining {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .target-history-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .target-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .target-history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      border-left: 3px solid var(--border-color);
+      font-size: 11px;
+    }
+
+    .target-history-item.achieved {
+      border-left-color: var(--success);
+    }
+
+    .target-history-item.missed {
+      border-left-color: var(--danger);
+    }
+
+    .history-date {
+      color: var(--text-muted);
+    }
+
+    .history-result {
+      font-weight: bold;
+      font-family: 'Consolas', monospace;
+    }
+
+    .history-result.achieved {
+      color: var(--success);
+    }
+
+    .history-result.missed {
+      color: var(--danger);
+    }
+
+    .history-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .history-badge.achieved {
+      background: rgba(46, 213, 115, 0.15);
+      color: var(--success);
+    }
+
+    .history-badge.missed {
+      background: rgba(255, 71, 87, 0.15);
+      color: var(--danger);
+    }
+
+    /* ===== BUKU CATATAN ===== */
+    .notes-container {
+      padding: 15px 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .notes-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-glow);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notes-textarea {
+      flex: 1;
+      min-height: 200px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-color);
+      font-size: 12px;
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .notes-textarea:focus {
+      border-color: var(--primary-glow);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
+    }
+
+    .notes-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .notes-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .notes-counter {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .notes-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .notes-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid;
+    }
+
+    .notes-clear-btn {
+      background: rgba(255, 71, 87, 0.1);
+      border-color: rgba(255, 71, 87, 0.3);
+      color: var(--danger);
+    }
+
+    .notes-clear-btn:hover {
+      background: rgba(255, 71, 87, 0.2);
+    }
+
+    .notes-save-indicator {
+      font-size: 10px;
+      color: var(--success);
+      opacity: 0;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .notes-save-indicator.show {
+      opacity: 1;
+    }
+
+    /* ===== DEBUG LOG BUTTON ===== */
+    .debug-btn {
+      background: linear-gradient(135deg, rgba(255, 165, 0, 0.15), rgba(255, 165, 0, 0.25));
+      border: 1px solid rgba(255, 165, 0, 0.4);
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: #ffa502;
+      font-size: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .debug-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 165, 0, 0.25), rgba(255, 165, 0, 0.35));
+      box-shadow: 0 0 12px rgba(255, 165, 0, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .debug-btn.downloading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .footer-left {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* ===== RESPONSIVE SIDEBAR — KONTEN MENYESUAIKAN SAAT DI-RESIZE ===== */
+
+    /* Base responsive: pastikan semua konten tidak overflow */
+    .visibility-menu-container,
+    .visibility-menu-container * {
+      min-width: 0; /* Prevent flex children from overflowing */
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header responsive */
+    .visibility-menu-header {
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: auto;
+    }
+
+    .visibility-menu-header h3 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      flex: 1;
+    }
+
+    /* Leaderboard table responsive */
+    .leaderboard-table {
+      table-layout: fixed;
+    }
+
+    .email-cell {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 0; /* Force ellipsis in table cell */
+    }
+
+    .earning-cell {
+      white-space: nowrap;
+    }
+
+    /* Target progress value responsive */
+    .target-progress-value {
+      word-break: break-all;
+      overflow-wrap: break-word;
+    }
+
+    .target-progress-header {
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* Target input group responsive */
+    .target-input-group {
+      flex-wrap: wrap;
+    }
+
+    /* Footer responsive */
+    .visibility-menu-footer {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Chat header responsive */
+    .chat-header-bar {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Leaderboard header responsive */
+    .leaderboard-header {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Notes footer responsive */
+    .notes-footer {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* ===== NARROW SIDEBAR (< 380px) ===== */
+    @media (max-width: 380px) {
+      /* Tab buttons: hanya tampilkan icon, sembunyikan teks */
+      .tab-btn {
+        padding: 8px 4px;
+        font-size: 0; /* Sembunyikan teks */
+        gap: 0;
+      }
+
+      .tab-btn i {
+        font-size: 14px; /* Perbesar icon */
+      }
+
+      /* Badge tetap terlihat */
+      .tab-btn .new-msg-badge,
+      .tab-btn .tab-badge {
+        font-size: 8px;
+      }
+
+      /* Header lebih compact */
+      .visibility-menu-header {
+        padding: 8px 10px;
+      }
+
+      .visibility-menu-header h3 {
+        font-size: 12px;
+      }
+
+      .visibility-menu-header h3::before {
+        display: none;
+      }
+
+      /* Visibility grid stack vertikal */
+      .visibility-status-summary {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+
+      /* Konten padding lebih kecil */
+      .visibility-menu-content,
+      .leaderboard-container,
+      .target-container,
+      .notes-container {
+        padding: 10px 12px;
+      }
+
+      /* Period filter lebih compact */
+      .period-filter {
+        gap: 3px;
+      }
+
+      .period-btn {
+        padding: 4px 6px;
+        font-size: 9px;
+      }
+
+      /* Leaderboard */
+      .leaderboard-title {
+        font-size: 12px;
+      }
+
+      .leaderboard-row td {
+        padding: 6px 4px;
+        font-size: 11px;
+      }
+
+      .rank-cell {
+        width: 28px;
+      }
+
+      /* Target */
+      .target-progress-value {
+        font-size: 14px;
+      }
+
+      /* Footer compact */
+      .visibility-menu-footer {
+        padding: 8px 10px;
+      }
+
+      .reset-btn {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+
+      .info-text {
+        font-size: 9px;
+      }
+
+      .info-text span {
+        display: none; /* Sembunyikan teks, hanya icon */
+      }
+
+      /* Chat compact */
+      .chat-messages {
+        padding: 8px 10px;
+      }
+
+      .chat-input-bar {
+        padding: 8px 10px;
+      }
+
+      /* Notes */
+      .notes-textarea {
+        min-height: 120px;
+      }
+
+      /* Online counter compact */
+      .online-counter span:last-child {
+        display: none; /* Sembunyikan "online" teks */
+      }
+
+      /* Debug button text hide */
+      .debug-btn {
+        padding: 4px 8px;
+        font-size: 0;
+      }
+      .debug-btn i {
+        font-size: 12px;
+      }
+    }
+
+    /* ===== VERY NARROW (< 320px) ===== */
+    @media (max-width: 320px) {
+      .tab-btn {
+        padding: 6px 2px;
+      }
+
+      .tab-btn i {
+        font-size: 12px;
+      }
+
+      .visibility-menu-header h3 {
+        font-size: 11px;
+      }
+
+      .online-counter {
+        display: none; /* Sembunyikan online counter di sangat sempit */
+      }
+
+      .header-actions {
+        gap: 0;
+      }
+
+      /* Leaderboard: sembunyikan rank column */
+      .rank-cell {
+        width: 22px;
+        font-size: 10px;
+      }
+
+      .earning-cell {
+        font-size: 10px;
+      }
+
+      .chat-my-username {
+        display: none !important;
+      }
+    }
+
+    /* ===== MEDIUM HEIGHT ===== */
+    @media (max-height: 600px) {
+      .tab-btn { padding: 7px 6px; font-size: 10px; }
+      .leaderboard-container, .target-container, .notes-container { padding: 10px 15px; }
+      .notes-textarea { min-height: 100px; }
+    }
+
+    /* ===== ONLINE COUNTER ===== */
+    .online-counter {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--text-muted);
+      -webkit-app-region: no-drag;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(46, 213, 115, 0.1);
+      border: 1px solid rgba(46, 213, 115, 0.2);
+    }
+
+    .online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: pulse-badge 2s infinite;
+    }
+
+    .online-count-num {
+      font-weight: bold;
+      color: var(--success);
+    }
+
+    /* ===== CHAT NOTIFICATION BADGE ===== */
+    .new-msg-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ff4757, #ff6b81);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1;
+      margin-left: 4px;
+      box-shadow: 0 0 8px rgba(255, 71, 87, 0.5), 0 0 16px rgba(255, 71, 87, 0.2);
+      animation: badge-pulse 1.5s ease-in-out infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes badge-pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 8px rgba(255, 71, 87, 0.5);
+      }
+      50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 14px rgba(255, 71, 87, 0.7), 0 0 24px rgba(255, 71, 87, 0.3);
+      }
+    }
+
+    /* ===== GLOBAL CHAT ===== */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .chat-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-glow);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chat-online-badge {
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(46, 213, 115, 0.15);
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 0;
+    }
+
+    .chat-messages::-webkit-scrollbar { width: 5px; }
+    .chat-messages::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--primary-glow-dim); border-radius: 3px; }
+
+    .chat-msg {
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 3px solid var(--border-color);
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .chat-msg.is-me {
+      background: rgba(0, 255, 255, 0.06);
+      border-left-color: var(--primary-glow);
+    }
+
+    .chat-msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+
+    .chat-msg-user {
+      font-size: 10px;
+      font-weight: bold;
+      color: var(--primary-glow);
+      font-family: 'Consolas', monospace;
+    }
+
+    .chat-msg.is-me .chat-msg-user {
+      color: var(--accent-gold);
+    }
+
+    .chat-msg-time {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .chat-msg-text {
+      font-size: 12px;
+      color: var(--text-color);
+      line-height: 1.4;
+    }
+
+    .chat-msg-system {
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      padding: 4px;
+      font-style: italic;
+    }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 6px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      color: var(--text-color);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary-glow);
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.15);
+    }
+
+    .chat-input::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-send-btn {
+      padding: 8px 14px;
+      background: rgba(0, 255, 255, 0.15);
+      border: 1px solid var(--primary-glow);
+      border-radius: 18px;
+      color: var(--primary-glow);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chat-send-btn:hover {
+      background: rgba(0, 255, 255, 0.25);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-muted);
+      gap: 8px;
+    }
+
+    .chat-empty i {
+      font-size: 28px;
+      opacity: 0.3;
+    }
+    /* ===== CHAT USERNAME SETUP OVERLAY ===== */
+    .chat-username-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 14, 20, 0.95);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+      gap: 14px;
+    }
+
+    .chat-username-overlay .setup-icon {
+      font-size: 36px;
+      color: var(--primary-glow);
+      text-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .chat-username-overlay h4 {
+      color: var(--text-color);
+      font-size: 14px;
+      margin: 0;
+      text-align: center;
+    }
+
+    .chat-username-overlay p {
+      color: var(--text-muted);
+      font-size: 10px;
+      margin: 0;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .username-input-group {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .username-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-color);
+      font-size: 12px;
+      font-family: 'Consolas', monospace;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .username-input:focus {
+      border-color: var(--primary-glow);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.15);
+    }
+
+    .username-input.input-error {
+      border-color: var(--danger);
+      box-shadow: 0 0 10px rgba(255, 71, 87, 0.2);
+    }
+
+    .username-input.input-success {
+      border-color: var(--success);
+      box-shadow: 0 0 10px rgba(46, 213, 115, 0.2);
+    }
+
+    .username-set-btn {
+      background: linear-gradient(135deg, var(--primary-glow), #00aaff);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .username-set-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+    }
+
+    .username-set-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .username-feedback {
+      font-size: 10px;
+      min-height: 14px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .username-feedback.error { color: var(--danger); }
+    .username-feedback.success { color: var(--success); }
+    .username-feedback.checking { color: var(--accent-gold); }
+
+    .username-rules {
+      font-size: 9px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.6;
+      opacity: 0.7;
+    }
+
+    /* Username display in chat header */
+    .chat-my-username {
+      font-size: 10px;
+      color: var(--primary-glow);
+      font-family: 'Consolas', monospace;
+      font-weight: bold;
+      background: rgba(0, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 255, 255, 0.15);
+    }
+
+    /* Username in chat messages */
+    .chat-msg-username {
+      font-size: 10px;
+      font-weight: bold;
+      color: #ffa502;
+      font-family: 'Consolas', monospace;
+    }
+
+    /* Sound toggle button */
+    .chat-sound-toggle {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      padding: 2px 6px;
+      transition: all 0.3s;
+      -webkit-app-region: no-drag;
+    }
+
+    .chat-sound-toggle:hover {
+      border-color: var(--primary-glow);
+      color: var(--primary-glow);
+    }
+
+    .chat-sound-toggle.muted {
+      color: var(--danger);
+      border-color: rgba(255, 71, 87, 0.3);
+    }</style></head><body><div class="visibility-menu-container"><div class="resize-handle" id="resize-handle"></div><div class="visibility-menu-header"><h3>CaptchaKing Tools</h3><div class="header-actions"><div class="online-counter" id="online-counter" title="User online"><span class="online-dot"></span> <span class="online-count-num" id="online-count">0</span> <span>online</span></div><button id="close-visibility-menu" class="close-menu-btn"><i class="fas fa-times"></i></button></div></div><div class="tab-navigation"><button class="tab-btn active" data-tab="visibility"><i class="fas fa-eye"></i> Visibility</button> <button class="tab-btn" data-tab="leaderboard"><i class="fas fa-trophy"></i> Leaderboard</button> <button class="tab-btn" data-tab="target"><i class="fas fa-bullseye"></i> Target</button> <button class="tab-btn" data-tab="notes"><i class="fas fa-sticky-note"></i> Notes</button> <button class="tab-btn" data-tab="chat"><i class="fas fa-comments"></i> Chat <span class="new-msg-badge" id="chat-badge" style="display:none;">0</span></button></div><div class="tab-content active" id="tab-visibility"><div class="visibility-status-summary"><div class="status-column visible-column"><div class="status-header"><i class="fas fa-eye"></i> <span>Displayed (<span id="visible-count">7</span>)</span></div><ul id="visible-list" class="status-list"></ul></div><div class="status-column hidden-column"><div class="status-header"><i class="fas fa-eye-slash"></i> <span>Hidden (<span id="hidden-count">0</span>)</span></div><ul id="hidden-list" class="status-list"></ul></div></div><div class="visibility-menu-divider"></div><div class="visibility-menu-content"><div class="visibility-section-title"><i class="fas fa-sliders-h"></i> <span>Toggle Elements</span></div><div class="visibility-option"><label><input type="checkbox" id="toggle-app-switch" checked="checked"><span>App Switcher (Pure Solver)</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-version" checked="checked"><span>Version Tag</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-expiration" checked="checked"><span>Expiration Timer</span></label></div><div class="visibility-option" style="display: none !important;"><label><input type="checkbox" id="toggle-daily-task" checked="checked"><span>Daily Task Progress</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-balance" checked="checked"><span>Balance</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-scroll-controls" checked="checked"><span>Scroll Controls</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-advanced-settings" checked="checked"><span>Advanced Settings Button</span></label></div><div class="visibility-option"><label><input type="checkbox" id="toggle-panel-controls" checked="checked"><span>Panel Controls (Next/Start/Stop)</span></label></div></div></div><div class="tab-content" id="tab-leaderboard"><div class="leaderboard-container"><div class="leaderboard-header"><div class="leaderboard-title"><i class="fas fa-trophy"></i> Earnings Leaderboard</div><div class="leaderboard-toggle" id="leaderboard-toggle"><span class="leaderboard-toggle-label" id="lb-toggle-label">ON</span><div class="toggle-switch active" id="lb-toggle-switch"><div class="toggle-thumb"></div></div></div></div><div class="period-filter" id="period-filter"><button class="period-btn active" data-period="today">Today</button> <button class="period-btn" data-period="week">This Week</button> <button class="period-btn" data-period="month">This Month</button> <button class="period-btn" data-period="year">This Year</button> <button class="period-btn" data-period="all">All</button></div><div id="leaderboard-content"><table class="leaderboard-table"><thead><tr><th>#</th><th>User</th><th style="text-align:right">Earnings</th></tr></thead><tbody id="leaderboard-body"></tbody></table><button class="show-more-btn" id="show-more-btn" style="display:none;"><i class="fas fa-chevron-down"></i> See More</button></div><div id="leaderboard-empty" class="leaderboard-empty" style="display:none;"><i class="fas fa-trophy"></i><div>No leaderboard data yet</div><div style="font-size:10px;margin-top:5px;">Data will appear when users start working</div></div><div id="leaderboard-disabled" class="leaderboard-disabled" style="display:none;"><i class="fas fa-eye-slash"></i><div>Leaderboard disabled</div><div style="font-size:10px;margin-top:5px;">Enable the toggle above to see rankings</div></div><div class="leaderboard-refresh-info" id="lb-refresh-info"><span><span class="refresh-dot"></span> Realtime Update</span> <span id="lb-last-update">Last: -</span></div></div></div><div class="tab-content" id="tab-target"><div class="target-container"><div class="target-section-title"><i class="fas fa-bullseye"></i> Daily Target</div><div class="target-input-group"><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><label style="font-size:11px;color:var(--text-muted);margin:0;">Currency:</label> <button class="period-btn active" id="currency-usd" data-currency="usd" style="padding:3px 10px;font-size:10px;">$ USD</button> <button class="period-btn" id="currency-rub" data-currency="rub" style="padding:3px 10px;font-size:10px;">₽ RUB</button> <button class="period-btn" id="currency-idr" data-currency="idr" style="display: none !important;">Rp IDR</button></div><div style="display:flex;align-items:center;gap:6px;"><label id="target-label">Target ($):</label> <input type="number" class="target-input" id="target-amount" min="0" step="0.1" placeholder="e.g: 5.00"> <button class="target-save-btn" id="target-save-btn"><i class="fas fa-save"></i> Set</button></div></div><div class="target-progress-box"><div class="target-progress-header"><span class="target-progress-label">Today's Progress</span> <span class="target-progress-value" id="target-progress-value" style="color: var(--primary-glow);">$0.00 / $0.00</span></div><div class="target-progress-bar"><div class="target-progress-fill" id="target-progress-fill" style="width: 0%;"></div></div><div class="target-remaining" id="target-remaining">Remaining: $0.00</div></div><div class="target-history-title"><i class="fas fa-history"></i> Last 3 Days History</div><div class="target-history-list" id="target-history-list"><div style="text-align:center;color:var(--text-muted);font-size:11px;padding:10px;">No history yet</div></div></div></div><div class="tab-content" id="tab-notes"><div class="notes-container"><div class="notes-title"><i class="fas fa-sticky-note"></i> Notebook</div><textarea class="notes-textarea" id="notes-textarea" placeholder="Write notes here...&#10;&#10;Example:&#10;- Target this week $35&#10;- Don't forget to withdraw on Friday&#10;- New API key installed"></textarea><div class="notes-footer"><div class="notes-counter"><span id="notes-char-count">0</span> characters</div><div style="display:flex;align-items:center;gap:10px;"><div class="notes-save-indicator" id="notes-save-indicator"><i class="fas fa-check"></i> Saved</div><div class="notes-actions"><button class="notes-btn notes-clear-btn" id="notes-clear-btn"><i class="fas fa-trash"></i> Delete</button></div></div></div></div></div><div class="tab-content" id="tab-chat"><div class="chat-container" style="position:relative;"><div class="chat-username-overlay" id="chat-username-overlay" style="display:none;"><i class="fas fa-user-tag setup-icon"></i><h4>Create Chat Username</h4><p>Choose a unique username for your identity in chat.<br>⚠️ Username can only be set <b>once</b> and cannot be changed!</p><div class="username-input-group"><input class="username-input" id="username-input" placeholder="your_username" maxlength="20" autocomplete="off" spellcheck="false"> <button class="username-set-btn" id="username-set-btn" disabled="disabled"><i class="fas fa-check"></i> Set</button></div><div class="username-feedback" id="username-feedback"></div><div class="username-rules">3-20 characters • Letters, numbers, _ and . only<br>Cannot be changed after setting</div></div><div class="chat-header-bar"><div class="chat-title"><i class="fas fa-comments"></i> Global Chat</div><span class="chat-my-username" id="chat-my-username" style="display:none;"></span> <button class="chat-sound-toggle" id="chat-sound-toggle" title="Toggle notification sound"><i class="fas fa-volume-up"></i></button> <span class="chat-online-badge" id="chat-online-count">0 online</span></div><div class="chat-messages" id="chat-messages"><div class="chat-empty" id="chat-empty"><i class="fas fa-comments"></i><div>No messages yet</div><div style="font-size:10px;">Start a conversation with other users!</div></div></div><div class="chat-input-bar"><input class="chat-input" id="chat-input" placeholder="Type a message..." maxlength="200"> <button class="chat-send-btn" id="chat-send-btn"><i class="fas fa-paper-plane"></i></button></div></div></div><div class="visibility-menu-footer" id="visibility-footer"><div class="footer-left"><button id="reset-visibility" class="reset-btn"><i class="fas fa-undo"></i> Reset</button> <button id="debug-download-btn" class="debug-btn" title="Download debug log for troubleshooting"><i class="fas fa-download"></i> Debug Log</button></div><div class="info-text"><i class="fas fa-info-circle"></i> <span>Settings saved automatically</span></div></div></div><audio id="chat-notif-sound" preload="auto"><source src="chat.mp3" type="audio/mpeg"></audio><script>const { ipcRenderer } = require('electron');
+    const fs = require('fs');
+    const path = require('path');
+
+    // ===== TAB NAVIGATION =====
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const visibilityFooter = document.getElementById('visibility-footer');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tabId = btn.dataset.tab;
+
+        // Reset all
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+
+        // Activate selected
+        btn.classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+
+        // Show/hide footer (only visible on visibility tab)
+        visibilityFooter.style.display = tabId === 'visibility' ? 'flex' : 'none';
+      });
+    });
+
+    // ===== VISIBILITY TAB LOGIC (existing) =====
+    const elementMappings = {
+      'toggle-app-switch': { name: 'App Switcher' },
+      'toggle-version': { name: 'Version Tag' },
+      'toggle-expiration': { name: 'Expiration Timer' },
+      // 'toggle-daily-task' removed
+      'toggle-balance': { name: 'Balance' },
+      'toggle-scroll-controls': { name: 'Scroll Controls' },
+      'toggle-advanced-settings': { name: 'Advanced Settings' },
+      'toggle-panel-controls': { name: 'Panel Controls' }
+    };
+
+    function loadSettings() {
+      const saved = localStorage.getItem('header-visibility-settings');
+      if (saved) return JSON.parse(saved);
+      return {
+        'toggle-app-switch': true, 'toggle-version': true,
+        'toggle-expiration': true, 'toggle-daily-task': true,
+        'toggle-balance': true, 'toggle-scroll-controls': true,
+        'toggle-advanced-settings': true, 'toggle-panel-controls': true
+      };
+    }
+
+    function saveSettings(settings) {
+      localStorage.setItem('header-visibility-settings', JSON.stringify(settings));
+      try { ipcRenderer.send('apply-visibility-settings', settings); } catch (e) { }
+    }
+
+    function updateStatusLists(settings) {
+      const visibleList = document.getElementById('visible-list');
+      const hiddenList = document.getElementById('hidden-list');
+      const visibleCount = document.getElementById('visible-count');
+      const hiddenCount = document.getElementById('hidden-count');
+      visibleList.innerHTML = '';
+      hiddenList.innerHTML = '';
+      let v = 0, h = 0;
+      Object.keys(elementMappings).forEach(id => {
+        const li = document.createElement('li');
+        li.innerHTML = `<i class="fas fa-circle status-dot"></i><span>${elementMappings[id].name}</span>`;
+        if (settings[id] !== false) { visibleList.appendChild(li); v++; }
+        else { hiddenList.appendChild(li); h++; }
+      });
+      visibleCount.textContent = v;
+      hiddenCount.textContent = h;
+      if (v === 0) visibleList.innerHTML = '<li class="empty-message"><i class="fas fa-info-circle"></i> None</li>';
+      if (h === 0) hiddenList.innerHTML = '<li class="empty-message"><i class="fas fa-info-circle"></i> None</li>';
+    }
+
+    function applySettings(settings) {
+      Object.keys(elementMappings).forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) cb.checked = settings[id] !== false;
+      });
+      updateStatusLists(settings);
+    }
+
+    const currentSettings = loadSettings();
+    applySettings(currentSettings);
+
+    Object.keys(elementMappings).forEach(id => {
+      const cb = document.getElementById(id);
+      if (cb) {
+        cb.addEventListener('change', (e) => {
+          const s = loadSettings();
+          s[id] = e.target.checked;
+          saveSettings(s);
+          updateStatusLists(s);
+        });
+      }
+    });
+
+    document.getElementById('reset-visibility').addEventListener('click', () => {
+      const def = {
+        'toggle-app-switch': true, 'toggle-version': true,
+        'toggle-expiration': true, 'toggle-daily-task': true,
+        'toggle-balance': true, 'toggle-scroll-controls': true,
+        'toggle-advanced-settings': true, 'toggle-panel-controls': true
+      };
+      saveSettings(def);
+      applySettings(def);
+    });
+
+    document.getElementById('close-visibility-menu').addEventListener('click', () => {
+      ipcRenderer.send('toggle-visibility-menu', false);
+    });
+
+    // ===== RESIZE HANDLE (drag untuk resize sidebar) =====
+    const resizeHandle = document.getElementById('resize-handle');
+    let isResizing = false;
+    let lastResizeX = 0;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      lastResizeX = e.screenX;
+      resizeHandle.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const deltaX = e.screenX - lastResizeX;
+      lastResizeX = e.screenX;
+      if (Math.abs(deltaX) > 0) {
+        ipcRenderer.send('sidebar-resize', deltaX);
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        resizeHandle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+
+    // ===== LEADERBOARD LOGIC =====
+    let leaderboardEnabled = localStorage.getItem('leaderboard-enabled') !== 'false';
+    let leaderboardData = [];
+    let currentPeriod = 'today';
+    let showAllUsers = false;
+    const DISPLAY_LIMIT = 20;
+
+    // Sensor email helper
+    function censorEmail(email) {
+      if (!email || typeof email !== 'string') return '***@***';
+      if (!email.includes('@')) return '***@***';
+      const [name, domain] = email.split('@');
+      if (!domain) return '***@***';
+      const visible = name.substring(0, Math.min(4, name.length));
+      const hidden = '*'.repeat(Math.max(0, name.length - 4));
+      return visible + hidden + '@' + domain;
+    }
+
+    // Toggle leaderboard
+    const lbToggle = document.getElementById('leaderboard-toggle');
+    const lbToggleSwitch = document.getElementById('lb-toggle-switch');
+    const lbToggleLabel = document.getElementById('lb-toggle-label');
+
+    function updateLeaderboardToggleUI() {
+      if (leaderboardEnabled) {
+        lbToggleSwitch.classList.add('active');
+        lbToggleLabel.textContent = 'ON';
+        document.getElementById('leaderboard-content').style.display = 'block';
+        document.getElementById('period-filter').style.display = 'flex';
+        document.getElementById('leaderboard-disabled').style.display = 'none';
+        document.getElementById('lb-refresh-info').style.display = 'flex';
+      } else {
+        lbToggleSwitch.classList.remove('active');
+        lbToggleLabel.textContent = 'OFF';
+        document.getElementById('leaderboard-content').style.display = 'none';
+        document.getElementById('period-filter').style.display = 'none';
+        document.getElementById('leaderboard-disabled').style.display = 'block';
+        document.getElementById('lb-refresh-info').style.display = 'none';
+      }
+    }
+
+    lbToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      leaderboardEnabled = !leaderboardEnabled;
+      localStorage.setItem('leaderboard-enabled', leaderboardEnabled);
+      updateLeaderboardToggleUI();
+      ipcRenderer.send('leaderboard-toggle', leaderboardEnabled);
+      if (leaderboardEnabled) {
+        ipcRenderer.send('leaderboard-get-data', currentPeriod);
+      }
+    });
+
+    updateLeaderboardToggleUI();
+
+    // Period filter
+    document.getElementById('period-filter').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const btn = e.target.closest('.period-btn');
+      if (!btn) return;
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPeriod = btn.dataset.period;
+      showAllUsers = false;
+      ipcRenderer.send('leaderboard-get-data', currentPeriod);
+    });
+
+    // Render leaderboard
+    function renderLeaderboard(data) {
+      try {
+        const tbody = document.getElementById('leaderboard-body');
+        const emptyEl = document.getElementById('leaderboard-empty');
+        const contentEl = document.getElementById('leaderboard-content');
+        const showMoreBtn = document.getElementById('show-more-btn');
+
+        if (!data || data.length === 0) {
+          contentEl.style.display = 'none';
+          emptyEl.style.display = 'block';
+          return;
+        }
+
+        contentEl.style.display = 'block';
+        emptyEl.style.display = 'none';
+
+        // Sort by earning descending
+        data.sort((a, b) => (b.earning || 0) - (a.earning || 0));
+
+        const displayData = showAllUsers ? data : data.slice(0, DISPLAY_LIMIT);
+        const hasMore = data.length > DISPLAY_LIMIT && !showAllUsers;
+
+        // Get current user email
+        let myEmail = localStorage.getItem('ck-user-email') || '';
+
+        tbody.innerHTML = '';
+        displayData.forEach((user, index) => {
+          try {
+            const rank = index + 1;
+            const isMe = user.email && myEmail && user.email === myEmail;
+            const tr = document.createElement('tr');
+            tr.className = 'leaderboard-row' + (isMe ? ' is-me' : '');
+
+            // Rank display
+            let rankDisplay = '';
+            if (rank === 1) rankDisplay = '<span class="rank-medal">🥇</span>';
+            else if (rank === 2) rankDisplay = '<span class="rank-medal">🥈</span>';
+            else if (rank === 3) rankDisplay = '<span class="rank-medal">🥉</span>';
+            else rankDisplay = `<span style="color:var(--text-muted)">${rank}</span>`;
+
+            const statusDot = user.isOnline ? '<span class="status-online"></span>' : '<span class="status-offline"></span>';
+            const emailDisplay = user.emailCensored || censorEmail(user.email);
+            
+            // Tampilkan earning per mata uang yang dimiliki user
+            const usdVal = Number(user.earning) || 0;
+            const rubVal = Number(user.earningRub) || 0;
+            const idrVal = Number(user.earningIdr) || 0;
+            
+            let earningParts = [];
+            if (usdVal > 0 || rubVal === 0) {
+              earningParts.push('$' + usdVal.toFixed(2));
+            }
+            if (rubVal > 0) {
+              earningParts.push('₽' + rubVal.toFixed(2));
+            }
+            const earningDisplay = earningParts.join(' + ');
+            // IDR balance removed as requested
+
+            tr.innerHTML = `
+              <td class="rank-cell ${rank <= 3 ? 'rank-' + rank : ''}">${rankDisplay}</td>
+              <td class="email-cell">${statusDot}${emailDisplay}${isMe ? ' <span style="color:var(--primary-glow);font-size:9px;">(Anda)</span>' : ''}</td>
+              <td class="earning-cell">${earningDisplay}</td>
+            `;
+            tbody.appendChild(tr);
+          } catch (rowErr) {
+            console.error('[Leaderboard Render Row Error]', rowErr, 'Data user:', JSON.stringify(user));
+          }
+        });
+
+        // Show more button
+        if (hasMore) {
+          showMoreBtn.style.display = 'block';
+          showMoreBtn.textContent = `See More (${data.length - DISPLAY_LIMIT} more users)`;
+        } else {
+          showMoreBtn.style.display = 'none';
+        }
+
+        // Update last update time
+        document.getElementById('lb-last-update').textContent = 'Last: ' + new Date().toLocaleTimeString('en-US');
+      } catch (err) {
+        console.error('[Leaderboard Main Render Error]', err, 'Tipe data:', typeof data);
+      }
+    }
+
+    // Show more button
+    document.getElementById('show-more-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showAllUsers = true;
+      renderLeaderboard(leaderboardData);
+    });
+
+    // Listen for leaderboard data from main process
+    ipcRenderer.on('leaderboard-data-updated', (event, data) => {
+      console.log(`[Leaderboard] 📥 Data received: ${data ? data.length : 0} users`);
+      
+      // Sanitize data - pastikan semua earning adalah angka valid
+      leaderboardData = (data || []).map(user => {
+        try {
+          const wasInvalid = (typeof user.earning !== 'number' || isNaN(user.earning));
+          if (wasInvalid) {
+            console.warn(`[Leaderboard] ⚠️ Invalid data for ${user.emailCensored || 'unknown'}: earning=${user.earning} (type: ${typeof user.earning})`);
+          }
+          return {
+            ...user,
+            earning: (typeof user.earning === 'number' && !isNaN(user.earning)) ? user.earning : 0,
+            earningRub: (typeof user.earningRub === 'number' && !isNaN(user.earningRub)) ? user.earningRub : 0,
+            earningIdr: (typeof user.earningIdr === 'number' && !isNaN(user.earningIdr)) ? user.earningIdr : 0,
+            valute: user.valute || 'usd',
+            isOnline: !!user.isOnline
+          };
+        } catch (mapErr) {
+          console.error('[Leaderboard Map Error]', mapErr, 'Item data:', JSON.stringify(user));
+          return null;
+        }
+      }).filter(Boolean);
+      
+      // Log ringkasan
+      const withEarning = leaderboardData.filter(u => u.earning > 0).length;
+      const zeroEarning = leaderboardData.filter(u => u.earning === 0).length;
+      console.log(`[Leaderboard] 📊 Summary: ${withEarning} have earnings, ${zeroEarning} earning $0`);
+      
+      if (leaderboardEnabled) {
+        renderLeaderboard(leaderboardData);
+      }
+      // Update online counter
+      if (leaderboardData.length > 0) {
+        const onlineCount = leaderboardData.filter(u => u.isOnline).length;
+        updateOnlineCount(onlineCount);
+      }
+    });
+
+    // Handle listener error (misal permission_denied)
+    ipcRenderer.on('leaderboard-error', (event, errorMsg) => {
+      const contentEl = document.getElementById('leaderboard-content');
+      const emptyEl = document.getElementById('leaderboard-empty');
+      if (contentEl && emptyEl) {
+        contentEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        emptyEl.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ff4757; font-size: 28px; margin-bottom: 10px; display: block;"></i><div style="color: #ff4757; font-size: 11px;">Connection Failed/Denied:<br>${errorMsg}</div>`;
+      }
+    });
+
+    // Request initial data
+    if (leaderboardEnabled) {
+      ipcRenderer.send('leaderboard-get-data', currentPeriod);
+    }
+
+    // PENTING: Auto-refresh data setInterval dengan jeda 30 detik DIHAPUS.
+    // Menghapus request poling ini karena API onValue Firebase Realtime Database
+    // secara bawaan merespon pembaruan langsung dari server sesaat setelah data berubah,
+    // melakukan trigger restart listener menyebabkan Firebase overload dan mengembalikan "Internal Server Error"
+    // di beberapa PC member yang mengakumulasi koneksi tak tertahankan.
+
+    // ===== TARGET HARIAN LOGIC =====
+    let targetCurrency = localStorage.getItem('ck-target-currency') || 'usd';
+
+    function getToday() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function loadTargetData() {
+      const saved = localStorage.getItem('ck-daily-target-data');
+      if (saved) return JSON.parse(saved);
+      return { targetAmount: 0, targetAmountIdr: 0, history: {} };
+    }
+
+    function saveTargetData(data) {
+      localStorage.setItem('ck-daily-target-data', JSON.stringify(data));
+    }
+
+    function getCurrentBalance() {
+      if (targetCurrency === 'idr') {
+        return parseFloat(localStorage.getItem('ck-current-balance-idr')) || 0;
+      }
+      if (targetCurrency === 'rub') {
+        return parseFloat(localStorage.getItem('ck-current-balance-rub')) || 0;
+      }
+      return parseFloat(localStorage.getItem('ck-current-balance-usd')) || 0;
+    }
+
+    function formatCurrency(amount) {
+      if (targetCurrency === 'idr') {
+        return 'Rp' + Math.round(amount).toLocaleString('id-ID');
+      }
+      if (targetCurrency === 'rub') {
+        return '₽' + amount.toFixed(2);
+      }
+      return '$' + amount.toFixed(2);
+    }
+
+    function getTargetAmount(data) {
+      if (targetCurrency === 'idr') return data.targetAmountIdr || 0;
+      if (targetCurrency === 'rub') return data.targetAmountRub || 0;
+      return data.targetAmount || 0;
+    }
+
+    // Currency toggle
+    function updateCurrencyToggleUI() {
+      const usdBtn = document.getElementById('currency-usd');
+      const rubBtn = document.getElementById('currency-rub');
+      const idrBtn = document.getElementById('currency-idr');
+      const label = document.getElementById('target-label');
+      const input = document.getElementById('target-amount');
+
+      // Reset all
+      usdBtn.classList.remove('active');
+      rubBtn.classList.remove('active');
+      idrBtn.classList.remove('active');
+
+      if (targetCurrency === 'idr') {
+        idrBtn.classList.add('active');
+        label.textContent = 'Target (Rp):';
+        input.step = '1000';
+        input.placeholder = 'e.g: 50000';
+      } else if (targetCurrency === 'rub') {
+        rubBtn.classList.add('active');
+        label.textContent = 'Target (₽):';
+        input.step = '0.1';
+        input.placeholder = 'cth: 5.00';
+      } else {
+        usdBtn.classList.add('active');
+        label.textContent = 'Target ($):';
+        input.step = '0.1';
+        input.placeholder = 'cth: 5.00';
+      }
+    }
+
+    document.getElementById('currency-usd').addEventListener('click', (e) => {
+      e.stopPropagation();
+      targetCurrency = 'usd';
+      localStorage.setItem('ck-target-currency', 'usd');
+      updateCurrencyToggleUI();
+      updateTargetUI();
+    });
+
+    document.getElementById('currency-rub').addEventListener('click', (e) => {
+      e.stopPropagation();
+      targetCurrency = 'rub';
+      localStorage.setItem('ck-target-currency', 'rub');
+      updateCurrencyToggleUI();
+      updateTargetUI();
+    });
+
+    document.getElementById('currency-idr').addEventListener('click', (e) => {
+      e.stopPropagation();
+      targetCurrency = 'idr';
+      localStorage.setItem('ck-target-currency', 'idr');
+      updateCurrencyToggleUI();
+      updateTargetUI();
+    });
+
+    updateCurrencyToggleUI();
+
+    function updateTargetUI() {
+      const data = loadTargetData();
+      const target = getTargetAmount(data);
+      const current = getCurrentBalance();
+
+      // Update progress value
+      const progressValue = document.getElementById('target-progress-value');
+      const progressFill = document.getElementById('target-progress-fill');
+      const remaining = document.getElementById('target-remaining');
+      const targetInput = document.getElementById('target-amount');
+
+      targetInput.value = target || '';
+      progressValue.textContent = `${formatCurrency(current)} / ${formatCurrency(target)}`;
+
+      if (target > 0) {
+        const pct = Math.min((current / target) * 100, 100);
+        progressFill.style.width = pct + '%';
+
+        if (pct >= 100) {
+          progressFill.style.background = 'linear-gradient(90deg, #2ed573, #7bed9f)';
+          progressValue.style.color = 'var(--success)';
+          remaining.textContent = '🎉 Target reached!';
+          remaining.style.color = 'var(--success)';
+        } else {
+          progressFill.style.background = 'linear-gradient(90deg, var(--primary-glow), #2ed573)';
+          progressValue.style.color = 'var(--primary-glow)';
+          remaining.textContent = `Remaining: ${formatCurrency(target - current)}`;
+          remaining.style.color = 'var(--text-muted)';
+        }
+      } else {
+        progressFill.style.width = '0%';
+        remaining.textContent = 'Set target to start tracking';
+      }
+
+      // History
+      renderTargetHistory(data);
+    }
+
+    function renderTargetHistory(data) {
+      const historyList = document.getElementById('target-history-list');
+      const history = data.history || {};
+
+      // Get last 3 days (excluding today)
+      const dates = [];
+      for (let i = 1; i <= 3; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+
+      if (dates.every(d => !history[d])) {
+        historyList.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:11px;padding:10px;">No history yet</div>';
+        return;
+      }
+
+      historyList.innerHTML = '';
+      dates.forEach(date => {
+        const entry = history[date];
+        if (!entry) return;
+
+        const cur = entry.currency || 'usd';
+        const earned = entry.earned || 0;
+        const tgt = entry.target || 0;
+        const achieved = earned >= tgt;
+        const item = document.createElement('div');
+        item.className = 'target-history-item ' + (achieved ? 'achieved' : 'missed');
+
+        const dateObj = new Date(date);
+        const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+
+        const fmtSymbol = cur === 'idr' ? 'Rp' : (cur === 'rub' ? '₽' : '$');
+        const fmtEarned = cur === 'idr' ? 'Rp' + Math.round(earned).toLocaleString('id-ID') : fmtSymbol + earned.toFixed(2);
+        const fmtTarget = cur === 'idr' ? 'Rp' + Math.round(tgt).toLocaleString('id-ID') : fmtSymbol + tgt.toFixed(2);
+
+        item.innerHTML = `
+          <span class="history-date">${dateStr}</span>
+          <span class="history-result ${achieved ? 'achieved' : 'missed'}">${fmtEarned} / ${fmtTarget}</span>
+          <span class="history-badge ${achieved ? 'achieved' : 'missed'}">${achieved ? '✅ Reached' : '❌ Not yet'}</span>
+        `;
+        historyList.appendChild(item);
+      });
+    }
+
+    // Save target
+    document.getElementById('target-save-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const val = parseFloat(document.getElementById('target-amount').value) || 0;
+      const data = loadTargetData();
+      if (targetCurrency === 'idr') {
+        data.targetAmountIdr = val;
+      } else if (targetCurrency === 'rub') {
+        data.targetAmountRub = val;
+      } else {
+        data.targetAmount = val;
+      }
+      saveTargetData(data);
+      updateTargetUI();
+    });
+
+    // Listen for balance updates (USD + RUB + IDR terpisah)
+    ipcRenderer.on('balance-for-target', (event, balanceUsd, balanceRub, balanceIdr) => {
+      // Validasi: pastikan nilai adalah angka yang valid
+      const safeUsd = (typeof balanceUsd === 'number' && !isNaN(balanceUsd)) ? balanceUsd : 0;
+      const safeRub = (typeof balanceRub === 'number' && !isNaN(balanceRub)) ? balanceRub : 0;
+      const safeIdr = (typeof balanceIdr === 'number' && !isNaN(balanceIdr)) ? balanceIdr : 0;
+      
+      console.log(`[Target] 📥 Balance received: $${safeUsd.toFixed(2)} | ₽${safeRub.toFixed(2)} | Rp${Math.round(safeIdr)}`);
+      
+      localStorage.setItem('ck-current-balance-usd', safeUsd);
+      localStorage.setItem('ck-current-balance-rub', safeRub);
+      localStorage.setItem('ck-current-balance-idr', safeIdr);
+      updateTargetUI();
+
+      // Save to today's history
+      const data = loadTargetData();
+      const today = getToday();
+      if (!data.history) data.history = {};
+      data.history[today] = {
+        target: getTargetAmount(data),
+        earned: getCurrentBalance(),
+        currency: targetCurrency
+      };
+      saveTargetData(data);
+    });
+
+    updateTargetUI();
+
+    // ===== BUKU CATATAN LOGIC =====
+    const notesTextarea = document.getElementById('notes-textarea');
+    const notesCharCount = document.getElementById('notes-char-count');
+    const notesSaveIndicator = document.getElementById('notes-save-indicator');
+    let saveTimeout = null;
+
+    // Load saved notes
+    const savedNotes = localStorage.getItem('ck-user-notes') || '';
+    notesTextarea.value = savedNotes;
+    notesCharCount.textContent = savedNotes.length;
+
+    // Auto-save on input
+    notesTextarea.addEventListener('input', () => {
+      const text = notesTextarea.value;
+      notesCharCount.textContent = text.length;
+
+      // Debounced save
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        localStorage.setItem('ck-user-notes', text);
+        notesSaveIndicator.classList.add('show');
+        setTimeout(() => notesSaveIndicator.classList.remove('show'), 2000);
+      }, 500);
+    });
+
+    // Prevent drag on textarea
+    notesTextarea.addEventListener('mousedown', (e) => e.stopPropagation());
+
+    // Clear button
+    document.getElementById('notes-clear-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (notesTextarea.value && confirm('Delete all notes?')) {
+        notesTextarea.value = '';
+        notesCharCount.textContent = '0';
+        localStorage.setItem('ck-user-notes', '');
+        notesSaveIndicator.classList.add('show');
+        setTimeout(() => notesSaveIndicator.classList.remove('show'), 2000);
+      }
+    });
+
+
+
+
+    // ===== ONLINE COUNTER =====
+    function updateOnlineCount(count) {
+      document.getElementById('online-count').textContent = count;
+      document.getElementById('chat-online-count').textContent = count + ' online';
+    }
+
+    // (Online count sudah di-handle oleh handler leaderboard-data-updated di atas)
+
+    // ===== GLOBAL CHAT LOGIC =====
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatSendBtn = document.getElementById('chat-send-btn');
+    const chatEmpty = document.getElementById('chat-empty');
+    const chatBadge = document.getElementById('chat-badge');
+    const chatNotifSound = document.getElementById('chat-notif-sound');
+    let currentChatTab = false;
+    let unreadCount = 0;
+    let lastRenderedMsgCount = 0;
+    let lastMsgTimestamp = 0; // Track timestamp pesan terakhir yang sudah dilihat
+    let chatInitialized = false; // Prevent notif pada load pertama
+    let myUsername = null; // Custom username yang sudah diset
+    const chatUsernameOverlay = document.getElementById('chat-username-overlay');
+    const chatMyUsernameDisplay = document.getElementById('chat-my-username');
+    const usernameInput = document.getElementById('username-input');
+    const usernameSetBtn = document.getElementById('username-set-btn');
+    const usernameFeedback = document.getElementById('username-feedback');
+    let usernameCheckTimeout = null;
+
+    // Track active tab for unread badge
+    const originalTabClick = tabBtns.forEach.bind(tabBtns);
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.tab === 'chat') {
+          currentChatTab = true;
+          unreadCount = 0;
+          chatBadge.style.display = 'none';
+          chatBadge.textContent = '0';
+        } else {
+          currentChatTab = false;
+        }
+      });
+    });
+
+    /**
+     * Play notification sound for new chat messages
+     */
+    let chatSoundEnabled = localStorage.getItem('ck-chat-sound') !== 'off'; // Default ON
+    const chatSoundToggle = document.getElementById('chat-sound-toggle');
+
+    // Init toggle icon
+    function updateSoundToggleIcon() {
+      if (chatSoundEnabled) {
+        chatSoundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+        chatSoundToggle.classList.remove('muted');
+        chatSoundToggle.title = 'Suara notifikasi: ON';
+      } else {
+        chatSoundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        chatSoundToggle.classList.add('muted');
+        chatSoundToggle.title = 'Suara notifikasi: OFF';
+      }
+    }
+    updateSoundToggleIcon();
+
+    chatSoundToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      chatSoundEnabled = !chatSoundEnabled;
+      localStorage.setItem('ck-chat-sound', chatSoundEnabled ? 'on' : 'off');
+      updateSoundToggleIcon();
+    });
+
+    function playChatNotifSound() {
+      if (!chatSoundEnabled) return;
+      try {
+        if (chatNotifSound) {
+          chatNotifSound.currentTime = 0;
+          chatNotifSound.volume = 0.5;
+          chatNotifSound.play().catch(() => {});
+        }
+      } catch (e) {}
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderChatMessages(messages) {
+      const myEmail = localStorage.getItem('ck-user-email') || '';
+
+      if (!messages || messages.length === 0) {
+        chatEmpty.style.display = 'flex';
+        return;
+      }
+      chatEmpty.style.display = 'none';
+
+      // Deteksi pesan BARU dari user LAIN
+      if (chatInitialized && messages.length > lastRenderedMsgCount) {
+        const newMessages = messages.slice(lastRenderedMsgCount);
+        const newFromOthers = newMessages.filter(m => m.email !== myEmail);
+        
+        if (newFromOthers.length > 0) {
+          // Play notif sound
+          playChatNotifSound();
+          
+          // Update badge jika BUKAN di tab chat
+          if (!currentChatTab) {
+            unreadCount += newFromOthers.length;
+            chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            chatBadge.style.display = 'inline-flex';
+          }
+        }
+      }
+      
+      // Tandai sebagai initialized setelah load pertama
+      if (!chatInitialized && messages.length > 0) {
+        chatInitialized = true;
+      }
+      lastRenderedMsgCount = messages.length;
+
+      chatMessages.innerHTML = '';
+      messages.forEach(msg => {
+        const isMe = msg.email === myEmail;
+        const div = document.createElement('div');
+        div.className = 'chat-msg' + (isMe ? ' is-me' : '');
+
+        const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+
+        // Tampilkan username jika ada, atau emailCensored
+        const displayName = msg.username 
+          ? `<span class="chat-msg-username">${escapeHtml(msg.username)}</span>` 
+          : `<span class="chat-msg-user">${escapeHtml(msg.emailCensored || '***')}</span>`;
+
+        div.innerHTML = `
+          <div class="chat-msg-header">
+            ${displayName}${isMe ? ' <span style="font-size:9px;color:var(--text-muted);">(You)</span>' : ''}
+            <span class="chat-msg-time">${time}</span>
+          </div>
+          <div class="chat-msg-text">${escapeHtml(msg.text)}</div>
+        `;
+        chatMessages.appendChild(div);
+      });
+
+      // Auto-scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Send message
+    function sendChatMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      if (text.length > 200) return;
+
+      ipcRenderer.send('chat-send-message', text, myUsername);
+      chatInput.value = '';
+      chatInput.focus();
+    }
+
+    chatSendBtn.addEventListener('click', () => sendChatMessage());
+
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+
+    // Receive chat messages from main process
+    ipcRenderer.on('chat-messages-updated', (event, messages) => {
+      console.log(`[Chat] 📥 Messages received: ${messages ? messages.length : 0} messages`);
+      if (!messages || messages.length === 0) {
+        console.log('[Chat] ⚠️ No messages to display');
+      }
+      renderChatMessages(messages);
+    });
+
+    // Handle chat listener error
+    ipcRenderer.on('chat-error', (event, errorMsg) => {
+      const chatEmpty = document.getElementById('chat-empty');
+      if (chatEmpty) {
+        chatEmpty.style.display = 'flex';
+        chatEmpty.innerHTML = `<i class="fas fa-user-lock" style="color: #ff4757; font-size: 28px; opacity: 0.8; margin-bottom: 8px;"></i><div style="color: #ff4757; font-size: 11px; text-align: center;">Chat Access Denied / Login Failed.<br>${errorMsg}</div>`;
+      }
+    });
+
+    // Request initial chat data
+    ipcRenderer.send('chat-get-messages');
+
+    // ===== USERNAME SETUP LOGIC =====
+    // Cek apakah user sudah punya username
+    ipcRenderer.send('chat-check-username');
+
+    ipcRenderer.on('chat-username-status', (event, data) => {
+      if (data.hasUsername && data.username) {
+        myUsername = data.username;
+        chatUsernameOverlay.style.display = 'none';
+        chatMyUsernameDisplay.textContent = '@' + data.username;
+        chatMyUsernameDisplay.style.display = 'inline';
+      } else {
+        // Tampilkan overlay setup username
+        chatUsernameOverlay.style.display = 'flex';
+        chatMyUsernameDisplay.style.display = 'none';
+      }
+    });
+
+    // Debounced username availability check saat mengetik
+    usernameInput.addEventListener('input', () => {
+      const val = usernameInput.value.trim();
+      usernameSetBtn.disabled = true;
+      usernameInput.className = 'username-input';
+      
+      if (val.length === 0) {
+        usernameFeedback.textContent = '';
+        usernameFeedback.className = 'username-feedback';
+        return;
+      }
+      
+      if (val.length < 3) {
+        usernameFeedback.textContent = 'Minimum 3 characters';
+        usernameFeedback.className = 'username-feedback error';
+        usernameInput.className = 'username-input input-error';
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9_.]+$/.test(val)) {
+        usernameFeedback.textContent = 'Only letters, numbers, _ and . allowed';
+        usernameFeedback.className = 'username-feedback error';
+        usernameInput.className = 'username-input input-error';
+        return;
+      }
+
+      // Debounce: cek ketersediaan setelah 500ms
+      usernameFeedback.textContent = '⏳ Checking...';
+      usernameFeedback.className = 'username-feedback checking';
+      
+      clearTimeout(usernameCheckTimeout);
+      usernameCheckTimeout = setTimeout(() => {
+        ipcRenderer.send('chat-check-username-available', val);
+      }, 500);
+    });
+
+    // Handle Enter key on username input
+    usernameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !usernameSetBtn.disabled) {
+        usernameSetBtn.click();
+      }
+    });
+
+    // Result cek ketersediaan
+    ipcRenderer.on('chat-username-available-result', (event, result) => {
+      if (result.available) {
+        usernameFeedback.textContent = '✅ Username available!';
+        usernameFeedback.className = 'username-feedback success';
+        usernameInput.className = 'username-input input-success';
+        usernameSetBtn.disabled = false;
+      } else {
+        usernameFeedback.textContent = '❌ ' + result.reason;
+        usernameFeedback.className = 'username-feedback error';
+        usernameInput.className = 'username-input input-error';
+        usernameSetBtn.disabled = true;
+      }
+    });
+
+    // Klik tombol Set Username
+    usernameSetBtn.addEventListener('click', () => {
+      const val = usernameInput.value.trim();
+      if (!val || val.length < 3) return;
+
+      usernameSetBtn.disabled = true;
+      usernameSetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      usernameFeedback.textContent = '⏳ Saving username...';
+      usernameFeedback.className = 'username-feedback checking';
+
+      ipcRenderer.send('chat-set-username', val);
+    });
+
+    // Result set username
+    ipcRenderer.on('chat-set-username-result', (event, result) => {
+      if (result.success) {
+        myUsername = result.username;
+        chatUsernameOverlay.style.display = 'none';
+        chatMyUsernameDisplay.textContent = '@' + result.username;
+        chatMyUsernameDisplay.style.display = 'inline';
+        usernameFeedback.textContent = '🎉 Username successfully set!';
+        usernameFeedback.className = 'username-feedback success';
+      } else {
+        usernameFeedback.textContent = '❌ ' + result.reason;
+        usernameFeedback.className = 'username-feedback error';
+        usernameSetBtn.disabled = false;
+        usernameSetBtn.innerHTML = '<i class="fas fa-check"></i> Set';
+      }
+    });
+
+    console.log('[Visibility Menu] Initialized with tabs: Visibility, Leaderboard, Target, Notes, Chat');
+
+    // ===== RENDERER LOG FORWARDING TO FILE =====
+    // Redirect console.log/warn/error dari renderer ke main process untuk disimpan ke file
+    const _origLog = console.log;
+    const _origWarn = console.warn;
+    const _origError = console.error;
+    const _debugTags = ['[Leaderboard]', '[Balance]', '[Target]', '[Chat]'];
+
+    function _shouldForward(args) {
+      if (!args || args.length === 0) return false;
+      const first = String(args[0]);
+      return _debugTags.some(tag => first.includes(tag));
+    }
+
+    console.log = function(...args) {
+      _origLog.apply(console, args);
+      if (_shouldForward(args)) {
+        try { ipcRenderer.send('debug-renderer-log', args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')); } catch(e) {}
+      }
+    };
+
+    console.warn = function(...args) {
+      _origWarn.apply(console, args);
+      if (_shouldForward(args)) {
+        try { ipcRenderer.send('debug-renderer-log', 'WARN: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')); } catch(e) {}
+      }
+    };
+
+    console.error = function(...args) {
+      _origError.apply(console, args);
+      if (_shouldForward(args)) {
+        try { ipcRenderer.send('debug-renderer-log', 'ERROR: ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')); } catch(e) {}
+      }
+    };
+
+    // ===== DEBUG LOG DOWNLOAD BUTTON =====
+    const debugDownloadBtn = document.getElementById('debug-download-btn');
+    
+    debugDownloadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      debugDownloadBtn.classList.add('downloading');
+      debugDownloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      ipcRenderer.send('debug-download-log');
+    });
+
+    ipcRenderer.on('debug-download-result', (event, result) => {
+      debugDownloadBtn.classList.remove('downloading');
+      debugDownloadBtn.innerHTML = '<i class="fas fa-download"></i> Debug Log';
+      
+      if (result.success) {
+        debugDownloadBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+        debugDownloadBtn.style.color = '#2ed573';
+        debugDownloadBtn.style.borderColor = '#2ed573';
+        setTimeout(() => {
+          debugDownloadBtn.innerHTML = '<i class="fas fa-download"></i> Debug Log';
+          debugDownloadBtn.style.color = '';
+          debugDownloadBtn.style.borderColor = '';
+        }, 2000);
+      }
+    });</script></body></html>

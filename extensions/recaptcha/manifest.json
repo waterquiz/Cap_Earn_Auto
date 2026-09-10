@@ -1,0 +1,53 @@
+{
+	"name": "reCAPTCHA Auto Solver",
+	"version": "2.0.0",
+	"manifest_version": 3,
+	"description": "Automatically solves reCAPTCHA using cloud-hosted AI",
+	"permissions": [
+		"activeTab",
+		"storage",
+		"scripting"
+	],
+	"host_permissions": [
+		"<all_urls>"
+	],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"*://*/recaptcha/api2/anchor*",
+				"*://*/recaptcha/enterprise/anchor*",
+				"*://www.google.com/recaptcha/*",
+				"*://www.gstatic.com/recaptcha/*",
+				"*://recaptcha.net/recaptcha/*"
+			],
+			"js": [
+				"verifyClick.js",
+				"button.js"
+		  	],
+		  	"run_at": "document_start",
+		  	"all_frames": true
+		},
+		{
+		  	"matches": [
+				"*://*/recaptcha/api2/bframe*",
+				"*://*/recaptcha/enterprise/bframe*",
+				"*://www.google.com/recaptcha/*",
+				"*://www.gstatic.com/recaptcha/*",
+				"*://recaptcha.net/recaptcha/*"
+			],
+		  	"js": [
+				"verifyClick.js",
+				"rc.help.js"
+		  	],
+		  	"run_at": "document_start",
+		  	"all_frames": true
+		}
+	],
+
+	"action": {
+		"default_popup": "popup.html"
+	}
+}
