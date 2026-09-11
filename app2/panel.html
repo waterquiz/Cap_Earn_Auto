@@ -1,15 +1,29 @@
 <!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="./"><title>CaptchaTyper Panel</title><link href="./css/app.8df9c6a7.css" rel="stylesheet"><link href="./css/chunk-vendors.8a3cab23.css" rel="stylesheet"><script>
+// Global browser shims for Electron environment
+window.global = window;
+window.__dirname = '/';
+window.__filename = '/panel.html';
+window.process = window.process || { 
+    env: { NODE_ENV: 'production' }, 
+    platform: 'win32', 
+    cwd: function() { return '/'; } 
+};
+
+window.ipcRenderer = window.ipcRenderer || {
+    send: function(channel, data) { console.log('[IPC Send]', channel, data); },
+    on: function(channel, listener) {},
+    once: function(channel, listener) {},
+    invoke: function(channel, data) {
+        if (channel === 'get-ct-config') return Promise.resolve({ panels: 12 });
+        return Promise.resolve({});
+    },
+    removeAllListeners: function() {}
+};
+globalThis.ipcRenderer = window.ipcRenderer;
+
 window.require = window.require || function(mod) {
     if (mod === 'electron') {
-        return {
-            ipcRenderer: {
-                send: function() {},
-                on: function() {},
-                once: function() {},
-                invoke: function() { return Promise.resolve({}); },
-                removeAllListeners: function() {}
-            }
-        };
+        return { ipcRenderer: window.ipcRenderer };
     }
     if (mod === 'fs') {
         return {
@@ -29,6 +43,8 @@ window.require = window.require || function(mod) {
     }
     return {};
 };
+globalThis.require = window.require;
+
 if (!window.CT_PANEL_ID) {
     try {
         var urlParams = new URLSearchParams(window.location.search);
@@ -37,6 +53,22 @@ if (!window.CT_PANEL_ID) {
         window.CT_PANEL_ID = '1';
     }
 }
+
+// Fix app:// image URLs
+try {
+    var origImgSrc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+    if (origImgSrc && origImgSrc.set) {
+        Object.defineProperty(HTMLImageElement.prototype, 'src', {
+            get: function() { return origImgSrc.get.call(this); },
+            set: function(val) {
+                if (typeof val === 'string' && val.indexOf('app://') !== -1) {
+                    val = val.replace(/^app:\/\/(\.\/)?/, '/');
+                }
+                origImgSrc.set.call(this, val);
+            }
+        });
+    }
+} catch(e){}
 </script><style>body {
         margin: 0;
         padding: 0;
@@ -106,65 +138,69 @@ if (!window.CT_PANEL_ID) {
             if (appElement && appElement.innerHTML.trim() === '') {
                 console.error(`[CT Panel ${panelId}] ❌ Vue app failed to mount after 10 seconds!`);
                 console.error(`[CT Panel ${panelId}] App element exists but is empty`);
-        }, 10000);</script>
+            }
+        }, 10000);
+    </script>
 <script>
 (function() {
-    // 1. Define custom webview element if we are not running in Electron (where customElements.get('webview') is already defined)
-    if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
-        class WebViewElement extends HTMLElement {
-            constructor() {
-                super();
-                const shadow = this.attachShadow({ mode: 'open' });
-                const iframe = document.createElement('iframe');
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                shadow.appendChild(iframe);
-                this._iframe = iframe;
-                
-                // Forward events from inner iframe to parent webview element
-                const self = this;
-                ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
-                    iframe.addEventListener(evtName, function(e) {
-                        const newEvt = new Event(evtName);
-                        // Copy properties
-                        for (let k in e) {
-                            try { newEvt[k] = e[k]; } catch(err){}
-                        }
-                        self.dispatchEvent(newEvt);
+    // 1. Define custom webview element if we are not running in Electron
+    try {
+        if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
+            class WebViewElement extends HTMLElement {
+                constructor() {
+                    super();
+                    const shadow = this.attachShadow({ mode: 'open' });
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    shadow.appendChild(iframe);
+                    this._iframe = iframe;
+                    
+                    const self = this;
+                    ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
+                        iframe.addEventListener(evtName, function(e) {
+                            const newEvt = new Event(evtName);
+                            for (let k in e) {
+                                try { newEvt[k] = e[k]; } catch(err){}
+                            }
+                            self.dispatchEvent(newEvt);
+                        });
                     });
-                });
-            }
-            static get observedAttributes() { return ['src']; }
-            attributeChangedCallback(name, oldValue, newValue) {
-                if (name === 'src' && this._iframe) {
-                    this._iframe.src = newValue;
                 }
+                static get observedAttributes() { return ['src']; }
+                attributeChangedCallback(name, oldValue, newValue) {
+                    if (name === 'src' && this._iframe) {
+                        this._iframe.src = newValue;
+                    }
+                }
+                get src() {
+                    return this._iframe ? this._iframe.src : '';
+                }
+                set src(val) {
+                    if (this._iframe) this._iframe.src = val;
+                    this.setAttribute('src', val);
+                }
+                get name() {
+                    return this._iframe ? this._iframe.name : '';
+                }
+                set name(val) {
+                    if (this._iframe) this._iframe.name = val;
+                    this.setAttribute('name', val);
+                }
+                loadURL(url, options) {
+                    return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
+                }
+                clearStorageData() { return Promise.resolve(); }
+                setProxy() { return Promise.resolve(); }
+                setCookies() { return Promise.resolve(); }
+                getCookies() { return Promise.resolve([]); }
+                setUserAgent() { return Promise.resolve(); }
             }
-            get src() {
-                return this._iframe ? this._iframe.src : '';
-            }
-            set src(val) {
-                if (this._iframe) this._iframe.src = val;
-                this.setAttribute('src', val);
-            }
-            get name() {
-                return this._iframe ? this._iframe.name : '';
-            }
-            set name(val) {
-                if (this._iframe) this._iframe.name = val;
-                this.setAttribute('name', val);
-            }
-            loadURL(url, options) {
-                return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
-            }
-            clearStorageData() { return Promise.resolve(); }
-            setProxy() { return Promise.resolve(); }
-            setCookies() { return Promise.resolve(); }
-            getCookies() { return Promise.resolve([]); }
-            setUserAgent() { return Promise.resolve(); }
+            customElements.define('webview', WebViewElement);
         }
-        customElements.define('webview', WebViewElement);
+    } catch (e) {
+        console.warn('[Webview Shim] Native customElements.define bypassed:', e);
     }
 
     if (typeof HTMLIFrameElement !== 'undefined') {

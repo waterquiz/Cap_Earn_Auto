@@ -1,18 +1,31 @@
 <!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pure Solver</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link href="./css/app.8df9c6a7.css" rel="stylesheet"><link href="./css/chunk-vendors.8a3cab23.css" rel="stylesheet"><script>
+// Global browser shims for Electron environment
+window.global = window;
+window.__dirname = '/';
+window.__filename = '/index.html';
+window.process = window.process || { 
+    env: { NODE_ENV: 'production' }, 
+    platform: 'win32', 
+    cwd: function() { return '/'; } 
+};
+
+window.ipcRenderer = window.ipcRenderer || {
+    send: function(channel, data) { console.log('[IPC Mock Send]', channel, data); },
+    on: function(channel, listener) {},
+    once: function(channel, listener) {},
+    invoke: function(channel, data) {
+        if (channel === 'get-ct-config') return Promise.resolve({ panels: 12 });
+        if (channel === 'get-scroll-state') return Promise.resolve({ scrollY: 0, maxScrollY: 0 });
+        if (channel === 'is-window-maximized') return Promise.resolve(false);
+        return Promise.resolve({});
+    },
+    removeAllListeners: function() {}
+};
+globalThis.ipcRenderer = window.ipcRenderer;
+
 window.require = window.require || function(mod) {
     if (mod === 'electron') {
-        return {
-            ipcRenderer: {
-                send: function() {},
-                on: function() {},
-                once: function() {},
-                invoke: function(channel) {
-                    if (channel === 'get-ct-config') return Promise.resolve({ panels: 12 });
-                    return Promise.resolve({});
-                },
-                removeAllListeners: function() {}
-            }
-        };
+        return { ipcRenderer: window.ipcRenderer };
     }
     if (mod === 'fs') {
         return {
@@ -32,6 +45,7 @@ window.require = window.require || function(mod) {
     }
     return {};
 };
+globalThis.require = window.require;
 </script><style>/* CT Header Styles - Consistent with CaptchaKing */
       :root {
         --bg-color: #0f0f1b;
@@ -355,7 +369,7 @@ window.require = window.require || function(mod) {
 
       .panel-frame {
         width: 100%;
-        height: 380px;
+        height: 520px;
         border: 1px solid #1e293b;
         border-radius: 4px;
         background: #0f0f1b;
@@ -401,58 +415,54 @@ window.require = window.require || function(mod) {
         width: 10px;
         right: 2px;
       }
-    </style></head><body><header id="ct-title-bar"><div class="ct-logo-container"><img src="../template/CK/Logo.png" alt="Pure Solver Logo"><h1>Pure<span class="typer-text"> Solver</span></h1><div class="ct-app-switch-container" style="display: none !important;"><button id="ct-app-switch-btn" class="ct-app-switch-btn" title="Switch to 2captcha"><span id="ct-app-switch-text">2captcha</span></button></div></div><div class="ct-center-container"><div class="ct-controls-container"><div class="ct-settings-group"><label for="ct-panel-count">Panels:</label> <input type="number" id="ct-panel-count" value="12" min="1" max="100"> <button id="ct-create-panels-btn">Set & Relaunch</button></div></div><div id="ct-expiration-container" class="ct-expiration-container" style="display: none !important;"><i class="fas fa-hourglass-half" style="display: none !important;"></i><div id="ct-time-left-display" class="ct-timer-display">Loading...</div></div><div class="ct-daily-task-container" style="display: none !important;"><i class="fas fa-video"></i><div class="ct-daily-progress"><span id="ct-daily-streak" class="ct-streak-count">0 days</span><div class="ct-progress-bar"><div id="ct-daily-progress-fill" class="ct-progress-fill" style="width: 0%"></div></div><button id="ct-upload-proof-btn" class="ct-upload-proof-btn" title="Guide & Upload Video Proof"><i class="fas fa-video"></i> Guide</button></div></div><div class="ct-balance-container" style="display: none !important;"><i class="fas fa-wallet"></i> <span id="ct-total-balance-display-usd">$0.00</span> <span class="ct-balance-separator" style="display: none !important;">|</span> <span id="ct-total-balance-display-idr" style="display: none !important;">Rp 0</span></div></div><div class="ct-window-actions-container"><button id="ct-scroll-up-btn" class="ct-control-btn" title="Scroll Up All Panels" style="display: none !important;"><i class="fas fa-chevron-up"></i></button> <button id="ct-scroll-down-btn" class="ct-control-btn" title="Scroll Down All Panels" style="display: none !important;"><i class="fas fa-chevron-down"></i></button> <button id="ct-settings-btn" class="ct-control-btn" title="CT Settings"><i class="fas fa-cog"></i></button> <button id="ct-minimize-btn" class="ct-control-btn" title="Minimize"><i class="fas fa-window-minimize"></i></button> <button id="ct-maximize-btn" class="ct-control-btn" title="Maximize"><i class="fas fa-window-maximize"></i></button> <button id="ct-close-btn" class="ct-control-btn" title="Close App"><i class="fas fa-times"></i></button></div></header><div id="ct-panels-container" class="ct-main-content"><div id="panels-grid"></div></div><div id="ct-scrollbar-container"><div id="ct-scrollbar-thumb"></div></div><script>// CT Header Controls and App Switch Functionality
+    </style></head><body><header id="ct-title-bar"><div class="ct-logo-container"><img src="../template/CK/Logo.png" alt="Pure Solver Logo"><h1>Pure<span class="typer-text"> Solver</span></h1><div class="ct-app-switch-container" style="display: none !important;"><button id="ct-app-switch-btn" class="ct-app-switch-btn" title="Switch to 2captcha"><span id="ct-app-switch-text">2captcha</span></button></div></div><div class="ct-center-container"><div class="ct-controls-container"><div class="ct-settings-group"><label for="ct-panel-count">Panels:</label> <input type="number" id="ct-panel-count" value="12" min="1" max="100"> <button id="ct-create-panels-btn">Set & Relaunch</button></div></div><div id="ct-expiration-container" class="ct-expiration-container" style="display: none !important;"><i class="fas fa-hourglass-half" style="display: none !important;"></i><div id="ct-time-left-display" class="ct-timer-display">Loading...</div></div><div class="ct-daily-task-container" style="display: none !important;"><i class="fas fa-video"></i><div class="ct-daily-progress"><span id="ct-daily-streak" class="ct-streak-count">0 days</span><div class="ct-progress-bar"><div id="ct-daily-progress-fill" class="ct-progress-fill" style="width: 0%"></div></div><button id="ct-upload-proof-btn" class="ct-upload-proof-btn" title="Guide & Upload Video Proof"><i class="fas fa-video"></i> Guide</button></div></div><div class="ct-balance-container" style="display: none !important;"><i class="fas fa-wallet"></i> <span id="ct-total-balance-display-usd">$0.00</span> <span class="ct-balance-separator" style="display: none !important;">|</span> <span id="ct-total-balance-display-idr" style="display: none !important;">Rp 0</span></div></div><div class="ct-window-actions-container"><button id="ct-scroll-up-btn" class="ct-control-btn" title="Scroll Up All Panels" style="display: none !important;"><i class="fas fa-chevron-up"></i></button> <button id="ct-scroll-down-btn" class="ct-control-btn" title="Scroll Down All Panels" style="display: none !important;"><i class="fas fa-chevron-down"></i></button> <button id="ct-settings-btn" class="ct-control-btn" title="CT Settings"><i class="fas fa-cog"></i></button> <button id="ct-minimize-btn" class="ct-control-btn" title="Minimize"><i class="fas fa-window-minimize"></i></button> <button id="ct-maximize-btn" class="ct-control-btn" title="Maximize"><i class="fas fa-window-maximize"></i></button> <button id="ct-close-btn" class="ct-control-btn" title="Close App"><i class="fas fa-times"></i></button></div></header><div id="ct-panels-container" class="ct-main-content"><div id="panels-grid"></div></div><div id="ct-scrollbar-container"><div id="ct-scrollbar-thumb"></div></div><script>
+// Web Panels Renderer function (defined globally and executed immediately)
+function renderWebPanels(count) {
+    const grid = document.getElementById('panels-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const cols = count <= 2 ? 2 : count <= 6 ? 3 : 4;
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    for (let i = 0; i < count; i++) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `panel.html?panelId=${i + 1}`;
+        iframe.className = 'panel-frame';
+        iframe.allow = 'autoplay';
+        grid.appendChild(iframe);
+    }
+}
+try {
+    renderWebPanels(12);
+} catch(e) {
+    console.error('Initial panel render error:', e);
+}
+</script><script>// CT Header Controls and App Switch Functionality
         document.addEventListener('DOMContentLoaded', async () => {
             const { ipcRenderer } = require('electron');
             const fs = require('fs');
             const path = require('path');
             
             console.log('[CT Header] Initializing...');
-            
-            // Load CT app config
-            const ctConfig = await ipcRenderer.invoke('get-ct-config');
-            const ctPanelCountInput = document.getElementById('ct-panel-count');
-            if (ctPanelCountInput && ctConfig) {
-                ctPanelCountInput.value = ctConfig.panels || 2;
-            }
 
             // Scroll controls
             const ctScrollUpBtn = document.getElementById('ct-scroll-up-btn');
             const ctScrollDownBtn = document.getElementById('ct-scroll-down-btn');
             if (ctScrollUpBtn) {
                 ctScrollUpBtn.addEventListener('click', () => {
-                    ipcRenderer.send('scroll-ct-panels', { deltaY: -250 });
+                    const cont = document.getElementById('ct-panels-container');
+                    if (cont) cont.scrollTop -= 250;
                 });
             }
             if (ctScrollDownBtn) {
                 ctScrollDownBtn.addEventListener('click', () => {
-                    ipcRenderer.send('scroll-ct-panels', { deltaY: 250 });
+                    const cont = document.getElementById('ct-panels-container');
+                    if (cont) cont.scrollTop += 250;
                 });
-            }
-
-            // Initialize Timer and Daily Task System (uses same Firebase account)
-            initializeCTTimer();
-            initializeCTDailyTask();
-            initializeCTBalance();
-            
-            // Web Panels Renderer function
-            function renderWebPanels(count) {
-                const grid = document.getElementById('panels-grid');
-                if (!grid) return;
-                grid.innerHTML = '';
-                const cols = count <= 2 ? 2 : count <= 6 ? 3 : 4;
-                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-                for (let i = 0; i < count; i++) {
-                    const iframe = document.createElement('iframe');
-                    iframe.src = `panel.html?panelId=${i + 1}`;
-                    iframe.className = 'panel-frame';
-                    iframe.allow = 'autoplay';
-                    grid.appendChild(iframe);
-                }
             }
 
             // Panel count controls
             const ctCreatePanelsBtn = document.getElementById('ct-create-panels-btn');
+            const ctPanelCountInput = document.getElementById('ct-panel-count');
             if (ctCreatePanelsBtn && ctPanelCountInput) {
                 ctCreatePanelsBtn.addEventListener('click', () => {
                     const panels = parseInt(ctPanelCountInput.value) || 12;
@@ -460,23 +470,21 @@ window.require = window.require || function(mod) {
                         renderWebPanels(panels);
                         ctCreatePanelsBtn.textContent = 'Loading...';
                         ctCreatePanelsBtn.disabled = true;
-                        if (ipcRenderer && ipcRenderer.send) {
-                            try { ipcRenderer.send('save-and-relaunch-ct-panels', { panels }); } catch(e){}
-                        }
                         
                         setTimeout(() => {
                             ctCreatePanelsBtn.textContent = 'Set & Relaunch';
                             ctCreatePanelsBtn.disabled = false;
-                        }, 1000);
+                        }, 600);
                     } else {
                         alert('Jumlah panel harus antara 1-100');
                     }
                 });
             }
 
-            // Initial render of 12 panels on load
-            const initialPanels = parseInt(ctPanelCountInput?.value) || 12;
-            renderWebPanels(initialPanels);
+            // Initialize Timer and Daily Task System safely
+            try { initializeCTTimer(); } catch(e){ console.warn('[CT Timer]', e); }
+            try { initializeCTDailyTask(); } catch(e){ console.warn('[CT Daily Task]', e); }
+            try { initializeCTBalance(); } catch(e){ console.warn('[CT Balance]', e); }
             
             // Listen for validation errors
             ipcRenderer.on('ct-panel-validation-error', (event, data) => {
@@ -883,62 +891,65 @@ window.require = window.require || function(mod) {
         })();</script>
 <script>
 (function() {
-    // 1. Define custom webview element if we are not running in Electron (where customElements.get('webview') is already defined)
-    if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
-        class WebViewElement extends HTMLElement {
-            constructor() {
-                super();
-                const shadow = this.attachShadow({ mode: 'open' });
-                const iframe = document.createElement('iframe');
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                shadow.appendChild(iframe);
-                this._iframe = iframe;
-                
-                // Forward events from inner iframe to parent webview element
-                const self = this;
-                ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
-                    iframe.addEventListener(evtName, function(e) {
-                        const newEvt = new Event(evtName);
-                        // Copy properties
-                        for (let k in e) {
-                            try { newEvt[k] = e[k]; } catch(err){}
-                        }
-                        self.dispatchEvent(newEvt);
+    try {
+        if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
+            class WebViewElement extends HTMLElement {
+                constructor() {
+                    super();
+                    const shadow = this.attachShadow({ mode: 'open' });
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    shadow.appendChild(iframe);
+                    this._iframe = iframe;
+                    
+                    // Forward events from inner iframe to parent webview element
+                    const self = this;
+                    ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
+                        iframe.addEventListener(evtName, function(e) {
+                            const newEvt = new Event(evtName);
+                            // Copy properties
+                            for (let k in e) {
+                                try { newEvt[k] = e[k]; } catch(err){}
+                            }
+                            self.dispatchEvent(newEvt);
+                        });
                     });
-                });
-            }
-            static get observedAttributes() { return ['src']; }
-            attributeChangedCallback(name, oldValue, newValue) {
-                if (name === 'src' && this._iframe) {
-                    this._iframe.src = newValue;
                 }
+                static get observedAttributes() { return ['src']; }
+                attributeChangedCallback(name, oldValue, newValue) {
+                    if (name === 'src' && this._iframe) {
+                        this._iframe.src = newValue;
+                    }
+                }
+                get src() {
+                    return this._iframe ? this._iframe.src : '';
+                }
+                set src(val) {
+                    if (this._iframe) this._iframe.src = val;
+                    this.setAttribute('src', val);
+                }
+                get name() {
+                    return this._iframe ? this._iframe.name : '';
+                }
+                set name(val) {
+                    if (this._iframe) this._iframe.name = val;
+                    this.setAttribute('name', val);
+                }
+                loadURL(url, options) {
+                    return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
+                }
+                clearStorageData() { return Promise.resolve(); }
+                setProxy() { return Promise.resolve(); }
+                setCookies() { return Promise.resolve(); }
+                getCookies() { return Promise.resolve([]); }
+                setUserAgent() { return Promise.resolve(); }
             }
-            get src() {
-                return this._iframe ? this._iframe.src : '';
-            }
-            set src(val) {
-                if (this._iframe) this._iframe.src = val;
-                this.setAttribute('src', val);
-            }
-            get name() {
-                return this._iframe ? this._iframe.name : '';
-            }
-            set name(val) {
-                if (this._iframe) this._iframe.name = val;
-                this.setAttribute('name', val);
-            }
-            loadURL(url, options) {
-                return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
-            }
-            clearStorageData() { return Promise.resolve(); }
-            setProxy() { return Promise.resolve(); }
-            setCookies() { return Promise.resolve(); }
-            getCookies() { return Promise.resolve([]); }
-            setUserAgent() { return Promise.resolve(); }
+            customElements.define('webview', WebViewElement);
         }
-        customElements.define('webview', WebViewElement);
+    } catch (e) {
+        console.warn('[Webview Shim] Native customElements.define bypassed:', e);
     }
 
     if (typeof HTMLIFrameElement !== 'undefined') {

@@ -57,6 +57,11 @@ def serve_img(filename):
 def serve_template(filename):
     return send_from_directory(TEMPLATE_DIR, filename)
 
+@app.route('/logo.png', methods=['GET'])
+@app.route('/favicon.ico', methods=['GET'])
+def serve_logo():
+    return send_from_directory(APP2_DIR, 'logo.png')
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "healthy"}), 200
