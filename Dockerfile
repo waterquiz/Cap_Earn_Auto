@@ -1,4 +1,5 @@
 FROM python:3.11-slim
+# Rebuild trigger: v1.2 universal recaptcha fix
 
 WORKDIR /app
 
