@@ -222,6 +222,7 @@ try {
             }
             
             if (!isDataUrl) {
+                self.removeAttribute('srcdoc');
                 self.src = url;
                 setTimeout(function() {
                     self.dispatchEvent(new Event('did-navigate'));
@@ -230,39 +231,23 @@ try {
                 return Promise.resolve();
             }
 
-            // Replace any {Domain} template placeholders with real domains
-            htmlContent = htmlContent.replace(/https:\/\/\{Domain\}\/recaptcha\//g, 'https://www.google.com/recaptcha/');
-            htmlContent = htmlContent.replace(/https:\/\/\{Domain\}\/1\//g, 'https://js.hcaptcha.com/1/');
-            htmlContent = htmlContent.replace(/https:\/\/\{Domain\}\/turnstile\//g, 'https://challenges.cloudflare.com/turnstile/');
-            htmlContent = htmlContent.replace(/\{Domain\}/g, 'www.google.com');
-
-            // Inject the console-message forwarder directly into the captcha HTML
-            var forwarderScript = '<script>\n' +
-                '(function() {\n' +
-                '    var _log = console.log;\n' +
-                '    console.log = function() {\n' +
-                '        _log.apply(console, arguments);\n' +
-                '        var str = Array.from(arguments).join(" ");\n' +
-                '        try { window.parent.postMessage({ type: "ctor-console-event", iframeId: window.name, msg: str }, "*"); } catch(e){}\n' +
-                '    };\n' +
-                '    setTimeout(function() {\n' +
-                '        console.log("frame-onload");\n' +
-                '        console.log("frame loaded !");\n' +
-                '        console.log("detect-active");\n' +
-                '    }, 150);\n' +
-                '})();\n' +
-                '<\/script>';
-
-            if (htmlContent.indexOf('<head>') !== -1) {
-                htmlContent = htmlContent.replace('<head>', '<head>' + forwarderScript);
-            } else if (htmlContent.indexOf('<html>') !== -1) {
-                htmlContent = htmlContent.replace('<html>', '<html><head>' + forwarderScript + '</head>');
-            } else {
-                htmlContent = forwarderScript + htmlContent;
+            var baseUrl = (options && options.baseURLForDataURL) ? options.baseURLForDataURL : 'worker.captchatypers.com';
+            var frameId = 'frame_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+            if (!self.name) {
+                self.name = frameId;
             }
 
-            // Set srcdoc directly: instant rendering in browser without network hops or 404 proxy errors
-            self.srcdoc = htmlContent;
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/store_captcha_frame', false); // Synchronous XHR
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ id: frameId, html: htmlContent, domain: baseUrl }));
+            } catch(e) {
+                console.error('[Sync Store Error]', e);
+            }
+
+            self.removeAttribute('srcdoc');
+            self.src = '/render_captcha_frame?id=' + frameId;
 
             setTimeout(function() {
                 var loadedEvt = new Event('console-message');
