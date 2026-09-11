@@ -132,20 +132,11 @@ def render_captcha_frame():
     if not ref_domain.startswith('http'):
         ref_domain = 'https://' + ref_domain
         
-    encoded_domain = urllib.parse.quote(ref_domain)
-    
-    raw_html = raw_html.replace('https://www.google.com/recaptcha/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://www.google.com/recaptcha/')
-    raw_html = raw_html.replace('https://www.gstatic.com/recaptcha/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://www.gstatic.com/recaptcha/')
-    raw_html = raw_html.replace('https://js.hcaptcha.com/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://js.hcaptcha.com/')
-    raw_html = raw_html.replace('https://assets.hcaptcha.com/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://assets.hcaptcha.com/')
-    raw_html = raw_html.replace('https://{Domain}/recaptcha/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://www.google.com/recaptcha/')
-    raw_html = raw_html.replace('https://{Domain}/1/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://js.hcaptcha.com/1/')
-    raw_html = raw_html.replace('https://{Domain}/', f'/proxy_captcha?domain={encoded_domain}&target_url=https://js.hcaptcha.com/')
-    if '<base' not in raw_html:
-        if '<head>' in raw_html:
-            raw_html = raw_html.replace('<head>', f'<head><base href="{ref_domain}">')
-        else:
-            raw_html = f'<base href="{ref_domain}">' + raw_html
+    # Clean any template domain placeholders
+    raw_html = raw_html.replace('https://{Domain}/recaptcha/', 'https://www.google.com/recaptcha/')
+    raw_html = raw_html.replace('https://{Domain}/1/', 'https://js.hcaptcha.com/1/')
+    raw_html = raw_html.replace('https://{Domain}/turnstile/', 'https://challenges.cloudflare.com/turnstile/')
+    raw_html = raw_html.replace('{Domain}', 'www.google.com')
             
     console_forwarder = """<script>
     (function() {
@@ -159,11 +150,13 @@ def render_captcha_frame():
             console.log("frame-onload");
             console.log("frame loaded !");
             console.log("detect-active");
-        }, 200);
+        }, 150);
     })();
     </script>"""
     if '<head>' in raw_html:
         raw_html = raw_html.replace('<head>', '<head>' + console_forwarder)
+    elif '<html>' in raw_html:
+        raw_html = raw_html.replace('<html>', '<html><head>' + console_forwarder + '</head>')
     else:
         raw_html = console_forwarder + raw_html
     return Response(raw_html, status=200, content_type='text/html; charset=utf-8')

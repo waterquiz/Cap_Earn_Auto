@@ -1309,22 +1309,39 @@ try {
                 return Promise.resolve();
             }
 
-            var baseUrl = (options && options.baseURLForDataURL) ? options.baseURLForDataURL : 'https://worker.captchatypers.com/';
-            var frameId = 'frame_' + Math.random().toString(36).substring(2) + '_' + Date.now();
-            self.name = frameId;
+            // Replace any {Domain} template placeholders with real domains
+            htmlContent = htmlContent.replace(/https:\/\/\{Domain\}\/recaptcha\//g, 'https://www.google.com/recaptcha/');
+            htmlContent = htmlContent.replace(/https:\/\/\{Domain\}\/1\//g, 'https://js.hcaptcha.com/1/');
+            htmlContent = htmlContent.replace(/https:\/\/\{Domain\}\/turnstile\//g, 'https://challenges.cloudflare.com/turnstile/');
+            htmlContent = htmlContent.replace(/\{Domain\}/g, 'www.google.com');
 
-            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || window.location.origin || 'https://capearnauto-production.up.railway.app').replace(/\/+$/, '');
-            
-            try {
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', captchaServer + '/store_captcha_frame', false); // Synchronous ensures backend saves before navigation
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify({ id: frameId, html: htmlContent, domain: baseUrl }));
-            } catch (err) {
-                console.error('[Webview Shim] Error storing frame:', err);
+            // Inject the console-message forwarder directly into the captcha HTML
+            var forwarderScript = '<script>\n' +
+                '(function() {\n' +
+                '    var _log = console.log;\n' +
+                '    console.log = function() {\n' +
+                '        _log.apply(console, arguments);\n' +
+                '        var str = Array.from(arguments).join(" ");\n' +
+                '        try { window.parent.postMessage({ type: "ctor-console-event", iframeId: window.name, msg: str }, "*"); } catch(e){}\n' +
+                '    };\n' +
+                '    setTimeout(function() {\n' +
+                '        console.log("frame-onload");\n' +
+                '        console.log("frame loaded !");\n' +
+                '        console.log("detect-active");\n' +
+                '    }, 150);\n' +
+                '})();\n' +
+                '<\/script>';
+
+            if (htmlContent.indexOf('<head>') !== -1) {
+                htmlContent = htmlContent.replace('<head>', '<head>' + forwarderScript);
+            } else if (htmlContent.indexOf('<html>') !== -1) {
+                htmlContent = htmlContent.replace('<html>', '<html><head>' + forwarderScript + '</head>');
+            } else {
+                htmlContent = forwarderScript + htmlContent;
             }
 
-            self.src = captchaServer + '/render_captcha_frame?id=' + frameId;
+            // Set srcdoc directly: instant rendering in browser without network hops or 404 proxy errors
+            self.srcdoc = htmlContent;
 
             setTimeout(function() {
                 var loadedEvt = new Event('console-message');
