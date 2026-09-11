@@ -415,24 +415,420 @@ globalThis.require = window.require;
         width: 10px;
         right: 2px;
       }
-    </style></head><body><header id="ct-title-bar"><div class="ct-logo-container"><img src="../template/CK/Logo.png" alt="Pure Solver Logo"><h1>Pure<span class="typer-text"> Solver</span></h1><div class="ct-app-switch-container" style="display: none !important;"><button id="ct-app-switch-btn" class="ct-app-switch-btn" title="Switch to 2captcha"><span id="ct-app-switch-text">2captcha</span></button></div></div><div class="ct-center-container"><div class="ct-controls-container"><div class="ct-settings-group"><label for="ct-panel-count">Panels:</label> <input type="number" id="ct-panel-count" value="12" min="1" max="100"> <button id="ct-create-panels-btn">Set & Relaunch</button></div></div><div id="ct-expiration-container" class="ct-expiration-container" style="display: none !important;"><i class="fas fa-hourglass-half" style="display: none !important;"></i><div id="ct-time-left-display" class="ct-timer-display">Loading...</div></div><div class="ct-daily-task-container" style="display: none !important;"><i class="fas fa-video"></i><div class="ct-daily-progress"><span id="ct-daily-streak" class="ct-streak-count">0 days</span><div class="ct-progress-bar"><div id="ct-daily-progress-fill" class="ct-progress-fill" style="width: 0%"></div></div><button id="ct-upload-proof-btn" class="ct-upload-proof-btn" title="Guide & Upload Video Proof"><i class="fas fa-video"></i> Guide</button></div></div><div class="ct-balance-container" style="display: none !important;"><i class="fas fa-wallet"></i> <span id="ct-total-balance-display-usd">$0.00</span> <span class="ct-balance-separator" style="display: none !important;">|</span> <span id="ct-total-balance-display-idr" style="display: none !important;">Rp 0</span></div></div><div class="ct-window-actions-container"><button id="ct-scroll-up-btn" class="ct-control-btn" title="Scroll Up All Panels" style="display: none !important;"><i class="fas fa-chevron-up"></i></button> <button id="ct-scroll-down-btn" class="ct-control-btn" title="Scroll Down All Panels" style="display: none !important;"><i class="fas fa-chevron-down"></i></button> <button id="ct-settings-btn" class="ct-control-btn" title="CT Settings"><i class="fas fa-cog"></i></button> <button id="ct-minimize-btn" class="ct-control-btn" title="Minimize"><i class="fas fa-window-minimize"></i></button> <button id="ct-maximize-btn" class="ct-control-btn" title="Maximize"><i class="fas fa-window-maximize"></i></button> <button id="ct-close-btn" class="ct-control-btn" title="Close App"><i class="fas fa-times"></i></button></div></header><div id="ct-panels-container" class="ct-main-content"><div id="panels-grid"></div></div><div id="ct-scrollbar-container"><div id="ct-scrollbar-thumb"></div></div><script>
-// Web Panels Renderer function (defined globally and executed immediately)
-function renderWebPanels(count) {
+    
+      /* Advanced Settings Modal Styles */
+      .ct-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(4, 7, 13, 0.85);
+        backdrop-filter: blur(6px);
+        z-index: 1000000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        animation: ctFadeIn 0.2s ease;
+      }
+      @keyframes ctFadeIn {
+        from { opacity: 0; transform: scale(0.98); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .ct-modal-card {
+        width: 94%;
+        max-width: 620px;
+        max-height: 88vh;
+        background: #0f172a;
+        border: 1px solid rgba(0, 255, 255, 0.35);
+        box-shadow: 0 10px 35px rgba(0, 255, 255, 0.18), 0 20px 40px rgba(0,0,0,0.85);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        color: #e2e8f0;
+        font-family: inherit;
+      }
+      .ct-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        background: #0b1120;
+        border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+      }
+      .ct-modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #00ffff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .ct-modal-close {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 26px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      .ct-modal-close:hover {
+        color: #ff3b30;
+        background: rgba(255, 59, 48, 0.15);
+      }
+      .ct-modal-body {
+        padding: 18px 22px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .ct-modal-section {
+        background: #1e293b;
+        border-radius: 8px;
+        padding: 14px 16px;
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+      .ct-modal-section h4 {
+        font-size: 12px;
+        letter-spacing: 0.05em;
+        color: #38bdf8;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+      }
+      .ct-setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        gap: 12px;
+      }
+      .ct-setting-row:last-child {
+        margin-bottom: 0;
+      }
+      .ct-setting-row label {
+        font-size: 13px;
+        color: #cbd5e1;
+        flex: 1;
+      }
+      .ct-setting-inputs {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1.2;
+        justify-content: flex-end;
+      }
+      .ct-setting-inputs input[type="range"] {
+        flex: 1;
+        accent-color: #00ffff;
+        cursor: pointer;
+      }
+      .ct-num-box {
+        width: 65px;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 4px;
+        color: #00ffff;
+        padding: 5px 8px;
+        font-size: 13px;
+        text-align: center;
+        font-weight: 600;
+      }
+      .ct-select-box {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 4px;
+        color: #e2e8f0;
+        padding: 6px 10px;
+        font-size: 13px;
+        flex: 1.2;
+      }
+      .ct-textarea-box {
+        width: 100%;
+        box-sizing: border-box;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 4px;
+        color: #e2e8f0;
+        padding: 8px 10px;
+        font-family: monospace;
+        font-size: 12px;
+        resize: vertical;
+      }
+      .ct-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        background: #0b1120;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+      .ct-btn-primary {
+        background: linear-gradient(135deg, #0284c7, #00ffff);
+        color: #0f172a;
+        font-weight: 700;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: opacity 0.2s, transform 0.1s;
+      }
+      .ct-btn-primary:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+      }
+      .ct-btn-secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #94a3b8;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s;
+      }
+      .ct-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #e2e8f0;
+      }
+</style></head><body><header id="ct-title-bar"><div class="ct-logo-container"><img src="../template/CK/Logo.png" alt="Pure Solver Logo"><h1>Pure<span class="typer-text"> Solver</span></h1><div class="ct-app-switch-container" style="display: none !important;"><button id="ct-app-switch-btn" class="ct-app-switch-btn" title="Switch to 2captcha"><span id="ct-app-switch-text">2captcha</span></button></div></div><div class="ct-center-container"><div class="ct-controls-container"><div class="ct-settings-group"><label for="ct-panel-count">Panels:</label> <input type="number" id="ct-panel-count" value="12" min="1" max="100"> <button id="ct-create-panels-btn">Set & Relaunch</button></div></div><div id="ct-expiration-container" class="ct-expiration-container" style="display: none !important;"><i class="fas fa-hourglass-half" style="display: none !important;"></i><div id="ct-time-left-display" class="ct-timer-display">Loading...</div></div><div class="ct-daily-task-container" style="display: none !important;"><i class="fas fa-video"></i><div class="ct-daily-progress"><span id="ct-daily-streak" class="ct-streak-count">0 days</span><div class="ct-progress-bar"><div id="ct-daily-progress-fill" class="ct-progress-fill" style="width: 0%"></div></div><button id="ct-upload-proof-btn" class="ct-upload-proof-btn" title="Guide & Upload Video Proof"><i class="fas fa-video"></i> Guide</button></div></div><div class="ct-balance-container" style="display: none !important;"><i class="fas fa-wallet"></i> <span id="ct-total-balance-display-usd">$0.00</span> <span class="ct-balance-separator" style="display: none !important;">|</span> <span id="ct-total-balance-display-idr" style="display: none !important;">Rp 0</span></div></div><div class="ct-window-actions-container"><button id="ct-scroll-up-btn" class="ct-control-btn" title="Scroll Up All Panels" style="display: none !important;"><i class="fas fa-chevron-up"></i></button> <button id="ct-scroll-down-btn" class="ct-control-btn" title="Scroll Down All Panels" style="display: none !important;"><i class="fas fa-chevron-down"></i></button> <button id="ct-settings-btn" class="ct-control-btn" title="CT Settings"><i class="fas fa-cog"></i></button> <button id="ct-minimize-btn" class="ct-control-btn" title="Minimize"><i class="fas fa-window-minimize"></i></button> <button id="ct-maximize-btn" class="ct-control-btn" title="Maximize"><i class="fas fa-window-maximize"></i></button> <button id="ct-close-btn" class="ct-control-btn" title="Close App"><i class="fas fa-times"></i></button></div></header>
+  <!-- Advanced Settings Modal Dialog -->
+  <div id="ct-settings-modal" class="ct-modal-overlay">
+    <div class="ct-modal-card">
+      <div class="ct-modal-header">
+        <div class="ct-modal-title"><i class="fas fa-sliders-h"></i> Advanced Display & Proxy Settings</div>
+        <button id="ct-modal-close-btn" class="ct-modal-close" title="Close Settings">&times;</button>
+      </div>
+      <div class="ct-modal-body">
+        <!-- Layout Section -->
+        <div class="ct-modal-section">
+          <h4><i class="fas fa-th"></i> Panel Layout & Dimensions</h4>
+          <div class="ct-setting-row">
+            <label for="modal-column-slider">Column Count (Panels / Row):</label>
+            <div class="ct-setting-inputs">
+              <input type="range" id="modal-column-slider" min="1" max="10" value="4">
+              <input type="number" id="modal-column-input" min="1" max="10" value="4" class="ct-num-box">
+            </div>
+          </div>
+          <div class="ct-setting-row">
+            <label for="modal-height-slider">Panel Height (px):</label>
+            <div class="ct-setting-inputs">
+              <input type="range" id="modal-height-slider" min="300" max="1200" step="10" value="520">
+              <input type="number" id="modal-height-input" min="300" max="1200" step="10" value="520" class="ct-num-box">
+            </div>
+          </div>
+          <div class="ct-setting-row">
+            <label for="modal-panel-count-slider">Total Panels Count:</label>
+            <div class="ct-setting-inputs">
+              <input type="range" id="modal-panel-count-slider" min="1" max="100" value="12">
+              <input type="number" id="modal-panel-count-input" min="1" max="100" value="12" class="ct-num-box">
+            </div>
+          </div>
+        </div>
+
+        <!-- Proxy Section -->
+        <div class="ct-modal-section">
+          <h4><i class="fas fa-network-wired"></i> Proxy Configuration</h4>
+          <div class="ct-setting-row">
+            <label for="modal-proxy-mode">Proxy Mode:</label>
+            <select id="modal-proxy-mode" class="ct-select-box">
+              <option value="none">No Proxy (Direct Connection)</option>
+              <option value="manual">Manual Proxies</option>
+            </select>
+          </div>
+          <div id="modal-manual-proxy-group" style="display: none; margin-top: 8px;">
+            <label for="modal-manual-proxies" style="font-size: 12px; color: #8892b0; display: block; margin-bottom: 4px;">
+              Manual Proxies (one per line, format: <code>ip:port:user:pass</code> or <code>ip:port</code>):
+            </label>
+            <textarea id="modal-manual-proxies" class="ct-textarea-box" rows="4" placeholder="192.168.1.1:8080:user:pass&#10;45.38.111.213:6128:user:pass"></textarea>
+          </div>
+        </div>
+
+        <!-- Captcha Solver Section -->
+        <div class="ct-modal-section">
+          <h4><i class="fas fa-robot"></i> Captcha Solver Settings</h4>
+          <div class="ct-setting-row">
+            <label for="modal-auto-solve">Auto Solve Challenge:</label>
+            <select id="modal-auto-solve" class="ct-select-box">
+              <option value="recaptcha_v2_local">JA Enabled (Auto Solve AI)</option>
+              <option value="audio">Audio Enabled (Auto Solve)</option>
+              <option value="false">Disabled (Manual Solve)</option>
+            </select>
+          </div>
+          <div class="ct-setting-row">
+            <label for="modal-solver-engine">Active Solver Engine:</label>
+            <select id="modal-solver-engine" class="ct-select-box">
+              <option value="captchasonic">CaptchaSonic / CaptchaAI Userscript</option>
+              <option value="custom_url">Custom URL AI Solver (Qwen API)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="ct-modal-footer">
+        <button id="modal-reset-btn" class="ct-btn-secondary"><i class="fas fa-undo"></i> Reset Default</button>
+        <button id="modal-apply-btn" class="ct-btn-primary"><i class="fas fa-check"></i> Save & Apply</button>
+      </div>
+    </div>
+  </div>
+<div id="ct-panels-container" class="ct-main-content"><div id="panels-grid"></div></div><div id="ct-scrollbar-container"><div id="ct-scrollbar-thumb"></div></div><script>
+// Web Panels Renderer & Settings Configuration
+function getSavedConfig() {
+    try {
+        const raw = localStorage.getItem('CT_ADVANCED_SETTINGS');
+        return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+}
+
+function renderWebPanels(count, customCols, customHeight) {
     const grid = document.getElementById('panels-grid');
     if (!grid) return;
+    const cfg = getSavedConfig() || {};
+    const panels = count || cfg.panels || 12;
+    const cols = customCols || cfg.columns || (panels <= 2 ? 2 : panels <= 6 ? 3 : 4);
+    const height = customHeight || cfg.height || 520;
+    
     grid.innerHTML = '';
-    const cols = count <= 2 ? 2 : count <= 6 ? 3 : 4;
-    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    for (let i = 0; i < count; i++) {
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    
+    for (let i = 0; i < panels; i++) {
         const iframe = document.createElement('iframe');
         iframe.src = `panel.html?panelId=${i + 1}`;
         iframe.className = 'panel-frame';
+        iframe.style.height = height + 'px';
         iframe.allow = 'autoplay';
         grid.appendChild(iframe);
     }
 }
+
+function initSettingsModal() {
+    const modal = document.getElementById('ct-settings-modal');
+    const settingsBtn = document.getElementById('ct-settings-btn');
+    const closeBtn = document.getElementById('ct-modal-close-btn');
+    const applyBtn = document.getElementById('modal-apply-btn');
+    const resetBtn = document.getElementById('modal-reset-btn');
+
+    if (!modal || !settingsBtn) return;
+
+    const colSlider = document.getElementById('modal-column-slider');
+    const colInput = document.getElementById('modal-column-input');
+    const heightSlider = document.getElementById('modal-height-slider');
+    const heightInput = document.getElementById('modal-height-input');
+    const panelCountSlider = document.getElementById('modal-panel-count-slider');
+    const panelCountInput = document.getElementById('modal-panel-count-input');
+    const proxyMode = document.getElementById('modal-proxy-mode');
+    const manualProxyGroup = document.getElementById('modal-manual-proxy-group');
+    const manualProxies = document.getElementById('modal-manual-proxies');
+    const autoSolve = document.getElementById('modal-auto-solve');
+    const solverEngine = document.getElementById('modal-solver-engine');
+
+    function syncPair(slider, input) {
+        if (!slider || !input) return;
+        slider.addEventListener('input', () => { input.value = slider.value; });
+        input.addEventListener('input', () => { 
+            let v = parseInt(input.value);
+            if (!isNaN(v)) slider.value = v;
+        });
+    }
+    syncPair(colSlider, colInput);
+    syncPair(heightSlider, heightInput);
+    syncPair(panelCountSlider, panelCountInput);
+
+    if (proxyMode && manualProxyGroup) {
+        proxyMode.addEventListener('change', () => {
+            manualProxyGroup.style.display = proxyMode.value === 'manual' ? 'block' : 'none';
+        });
+    }
+
+    function populateModalFields() {
+        const cfg = getSavedConfig() || {};
+        const currentPanels = parseInt(document.getElementById('ct-panel-count')?.value) || 12;
+        if (colSlider) colSlider.value = cfg.columns || 4;
+        if (colInput) colInput.value = cfg.columns || 4;
+        if (heightSlider) heightSlider.value = cfg.height || 520;
+        if (heightInput) heightInput.value = cfg.height || 520;
+        if (panelCountSlider) panelCountSlider.value = cfg.panels || currentPanels;
+        if (panelCountInput) panelCountInput.value = cfg.panels || currentPanels;
+        if (proxyMode) proxyMode.value = cfg.proxyMode || 'none';
+        if (manualProxies) manualProxies.value = cfg.manualProxies || '';
+        if (autoSolve) autoSolve.value = cfg.autoSolve || 'recaptcha_v2_local';
+        if (solverEngine) solverEngine.value = cfg.solverEngine || 'captchasonic';
+        if (manualProxyGroup) manualProxyGroup.style.display = (cfg.proxyMode === 'manual') ? 'block' : 'none';
+    }
+
+    settingsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        populateModalFields();
+        modal.style.display = 'flex';
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+
+    if (applyBtn) {
+        applyBtn.addEventListener('click', () => {
+            const columns = parseInt(colInput.value) || 4;
+            const height = parseInt(heightInput.value) || 520;
+            const panels = parseInt(panelCountInput.value) || 12;
+            const cfg = {
+                columns: columns,
+                height: height,
+                panels: panels,
+                proxyMode: proxyMode ? proxyMode.value : 'none',
+                manualProxies: manualProxies ? manualProxies.value : '',
+                autoSolve: autoSolve ? autoSolve.value : 'recaptcha_v2_local',
+                solverEngine: solverEngine ? solverEngine.value : 'captchasonic'
+            };
+            localStorage.setItem('CT_ADVANCED_SETTINGS', JSON.stringify(cfg));
+            
+            // Update top bar panel count input
+            const headerCount = document.getElementById('ct-panel-count');
+            if (headerCount) headerCount.value = panels;
+
+            // Re-render live
+            renderWebPanels(panels, columns, height);
+
+            applyBtn.textContent = 'Saved!';
+            setTimeout(() => {
+                applyBtn.innerHTML = '<i class="fas fa-check"></i> Save & Apply';
+                modal.style.display = 'none';
+            }, 400);
+        });
+    }
+
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (colSlider) { colSlider.value = 4; colInput.value = 4; }
+            if (heightSlider) { heightSlider.value = 520; heightInput.value = 520; }
+            if (panelCountSlider) { panelCountSlider.value = 12; panelCountInput.value = 12; }
+            if (proxyMode) proxyMode.value = 'none';
+            if (manualProxies) manualProxies.value = '';
+            if (autoSolve) autoSolve.value = 'recaptcha_v2_local';
+            if (solverEngine) solverEngine.value = 'captchasonic';
+            if (manualProxyGroup) manualProxyGroup.style.display = 'none';
+        });
+    }
+}
+
+// Initial Render
 try {
-    renderWebPanels(12);
+    const saved = getSavedConfig();
+    const initPanels = saved && saved.panels ? saved.panels : 12;
+    const headerInput = document.getElementById('ct-panel-count');
+    if (headerInput && saved && saved.panels) headerInput.value = saved.panels;
+    renderWebPanels(initPanels);
 } catch(e) {
     console.error('Initial panel render error:', e);
 }
@@ -443,6 +839,9 @@ try {
             const path = require('path');
             
             console.log('[CT Header] Initializing...');
+
+            // Initialize Settings Modal
+            initSettingsModal();
 
             // Scroll controls
             const ctScrollUpBtn = document.getElementById('ct-scroll-up-btn');
@@ -460,13 +859,16 @@ try {
                 });
             }
 
-            // Panel count controls
+            // Panel count controls in top header
             const ctCreatePanelsBtn = document.getElementById('ct-create-panels-btn');
             const ctPanelCountInput = document.getElementById('ct-panel-count');
             if (ctCreatePanelsBtn && ctPanelCountInput) {
                 ctCreatePanelsBtn.addEventListener('click', () => {
                     const panels = parseInt(ctPanelCountInput.value) || 12;
                     if (panels >= 1 && panels <= 100) {
+                        const cfg = getSavedConfig() || {};
+                        cfg.panels = panels;
+                        localStorage.setItem('CT_ADVANCED_SETTINGS', JSON.stringify(cfg));
                         renderWebPanels(panels);
                         ctCreatePanelsBtn.textContent = 'Loading...';
                         ctCreatePanelsBtn.disabled = true;
@@ -474,7 +876,7 @@ try {
                         setTimeout(() => {
                             ctCreatePanelsBtn.textContent = 'Set & Relaunch';
                             ctCreatePanelsBtn.disabled = false;
-                        }, 600);
+                        }, 500);
                     } else {
                         alert('Jumlah panel harus antara 1-100');
                     }
@@ -485,7 +887,7 @@ try {
             try { initializeCTTimer(); } catch(e){ console.warn('[CT Timer]', e); }
             try { initializeCTDailyTask(); } catch(e){ console.warn('[CT Daily Task]', e); }
             try { initializeCTBalance(); } catch(e){ console.warn('[CT Balance]', e); }
-            
+
             // Listen for validation errors
             ipcRenderer.on('ct-panel-validation-error', (event, data) => {
                 alert(data.message);
@@ -494,94 +896,33 @@ try {
                     ctCreatePanelsBtn.disabled = false;
                 }
             });
-            
-            // App Switch Button
-            const ctAppSwitchBtn = document.getElementById('ct-app-switch-btn');
-            if (ctAppSwitchBtn) {
-                ctAppSwitchBtn.addEventListener('click', () => {
-                    // Send message to main process to switch back to 2captcha app
-                    ipcRenderer.send('switch-to-main-app');
-                });
-            }
-            
+
             // Window Control Buttons
             const ctMinimizeBtn = document.getElementById('ct-minimize-btn');
             const ctMaximizeBtn = document.getElementById('ct-maximize-btn');
             const ctCloseBtn = document.getElementById('ct-close-btn');
-            
             if (ctMinimizeBtn) {
                 ctMinimizeBtn.addEventListener('click', () => {
-                    ipcRenderer.send('minimize-window');
+                    const cont = document.getElementById('ct-panels-container');
+                    if (cont) cont.style.display = cont.style.display === 'none' ? 'block' : 'none';
                 });
             }
-            
             if (ctMaximizeBtn) {
                 ctMaximizeBtn.addEventListener('click', () => {
-                    ipcRenderer.send('maximize-window');
-                });
-            }
-            
-            if (ctCloseBtn) {
-                ctCloseBtn.addEventListener('click', () => {
-                    ipcRenderer.send('close-window');
-                });
-            }
-            
-            // Handle double-click on title bar to maximize/restore
-            const titleBar = document.getElementById('ct-title-bar');
-            if (titleBar) {
-                titleBar.addEventListener('dblclick', (e) => {
-                    // Only trigger if double-clicking on header area, not buttons, inputs, or controls
-                    if (!e.target.closest('button') && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('textarea')) {
-                        ipcRenderer.send('maximize-window');
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(()=>{});
+                    } else {
+                        document.exitFullscreen().catch(()=>{});
                     }
                 });
             }
-            
-            // Update maximize button icon based on window state
-            function updateMaximizeIcon() {
-                if (ctMaximizeBtn) {
-                    ipcRenderer.invoke('is-window-maximized').then((isMaximized) => {
-                        const icon = ctMaximizeBtn.querySelector('i');
-                        if (icon) {
-                            if (isMaximized) {
-                                icon.className = 'fas fa-window-restore';
-                                ctMaximizeBtn.title = 'Restore';
-                            } else {
-                                icon.className = 'fas fa-window-maximize';
-                                ctMaximizeBtn.title = 'Maximize';
-                            }
-                        }
-                    });
-                }
-            }
-            
-            // Initial icon state
-            updateMaximizeIcon();
-            
-            // Listen for window state changes
-            ipcRenderer.on('window-maximized', updateMaximizeIcon);
-            ipcRenderer.on('window-unmaximized', updateMaximizeIcon);
-            
-            // Context menu for header (right-click)
-            document.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                ipcRenderer.send('show-ct-panel-context-menu');
-            });
-
-            const ctSettingsBtn = document.getElementById('ct-settings-btn');
-            if (ctSettingsBtn) {
-                console.log('[CT Header] Settings button found, adding listener');
-                ctSettingsBtn.addEventListener('click', () => {
-                    console.log('[CT Header] Settings button clicked, sending open-advanced-settings...');
-                    ipcRenderer.send('open-advanced-settings');
+            if (ctCloseBtn) {
+                ctCloseBtn.addEventListener('click', () => {
+                    if (confirm('Close Pure Solver?')) window.close();
                 });
-            } else {
-                console.warn('[CT Header] Settings button NOT found in DOM!');
             }
         });
 
-        // CT Timer System (uses same Firebase account)
         function initializeCTTimer() {
             console.log('[CT Timer] Initializing timer from Firebase...');
             const { ipcRenderer } = require('electron');
