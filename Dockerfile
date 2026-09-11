@@ -11,6 +11,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
+COPY app2 ./app2
+COPY template ./template
 
 ENV PORT=5000
 ENV PYTHONUNBUFFERED=1

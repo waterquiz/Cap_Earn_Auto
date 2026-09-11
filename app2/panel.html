@@ -1,4 +1,43 @@
-<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="./"><title>CaptchaTyper Panel</title><link href="./css/app.8df9c6a7.css" rel="stylesheet"><link href="./css/chunk-vendors.8a3cab23.css" rel="stylesheet"><style>body {
+<!doctype html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="./"><title>CaptchaTyper Panel</title><link href="./css/app.8df9c6a7.css" rel="stylesheet"><link href="./css/chunk-vendors.8a3cab23.css" rel="stylesheet"><script>
+window.require = window.require || function(mod) {
+    if (mod === 'electron') {
+        return {
+            ipcRenderer: {
+                send: function() {},
+                on: function() {},
+                once: function() {},
+                invoke: function() { return Promise.resolve({}); },
+                removeAllListeners: function() {}
+            }
+        };
+    }
+    if (mod === 'fs') {
+        return {
+            existsSync: function() { return false; },
+            readFileSync: function() { return ''; },
+            writeFileSync: function() {}
+        };
+    }
+    if (mod === 'path') {
+        return {
+            join: function() { return Array.from(arguments).join('/'); },
+            resolve: function() { return Array.from(arguments).join('/'); }
+        };
+    }
+    if (mod === 'os') {
+        return { homedir: function() { return '/'; } };
+    }
+    return {};
+};
+if (!window.CT_PANEL_ID) {
+    try {
+        var urlParams = new URLSearchParams(window.location.search);
+        window.CT_PANEL_ID = urlParams.get('panelId') || '1';
+    } catch(e) {
+        window.CT_PANEL_ID = '1';
+    }
+}
+</script><style>body {
         margin: 0;
         padding: 0;
         background-color: #0f0f1b;
