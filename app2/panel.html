@@ -306,16 +306,16 @@ try {
     // Forward query selectors for 'webview' to also match the generated iframe
     var origQuerySelectorAll = document.querySelectorAll;
     document.querySelectorAll = function(selectors) {
-        if (typeof selectors === 'string' && selectors.indexOf('webview') !== -1) {
-            selectors = selectors.replace(/\bwebview\b/g, 'iframe[data-is-webview="true"], webview');
+        if (selectors === 'webview') {
+            selectors = 'iframe[data-is-webview="true"], webview';
         }
         return origQuerySelectorAll.call(document, selectors);
     };
 
     var origQuerySelector = document.querySelector;
     document.querySelector = function(selectors) {
-        if (typeof selectors === 'string' && selectors.indexOf('webview') !== -1) {
-            selectors = selectors.replace(/\bwebview\b/g, 'iframe[data-is-webview="true"], webview');
+        if (selectors === 'webview') {
+            selectors = 'iframe[data-is-webview="true"], webview';
         }
         return origQuerySelector.call(document, selectors);
     };

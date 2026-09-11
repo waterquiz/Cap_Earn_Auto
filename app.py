@@ -143,9 +143,16 @@ def recaptcha_proxy(domain, endpoint):
                 content_text = content_text.replace('https://www.google.com/recaptcha/', f'/recaptcha_proxy/{domain}/')
                 content_text = content_text.replace('https://www.gstatic.com/recaptcha/', f'/gstatic_proxy/{domain}/')
 
-                # In HTML pages (anchor, bframe), shim Window.prototype.postMessage so targetOrigin '*' is used
+                # In JS scripts (recaptcha__en.js), ensure cross-window postMessage handshake uses targetOrigin '*'
+                if 'javascript' in content_type:
+                    content_text = content_text.replace('B.postMessage(Rv,z[24](6,y,X),[O.port2])', 'B.postMessage(Rv,"*",[O.port2])')
+                    content_text = re.sub(r'(\.postMessage\([^,]+,)[^,]+(,\[[^\]]+\]\))', r'\1"*"\2', content_text)
+                    content_text = content_text.replace('N&&k&&C&&u.ports.length>B', 'N&&C&&u.ports.length>B')
+                    content_text = content_text.replace('Z.R(N.origin)', 'true')
+
+                # In HTML pages (anchor, bframe), shim Window.prototype.postMessage so targetOrigin '*' is used safely
                 if 'html' in content_type:
-                    pm_shim = '<script>(function(){try{var o=Window.prototype.postMessage;Window.prototype.postMessage=function(m,t,tr){return o.call(this,m,"*",tr);};}catch(e){}})();</script>'
+                    pm_shim = '<script>(function(){try{var o=Window.prototype.postMessage;Window.prototype.postMessage=function(m,t,tr){if(typeof t==="object"&&t!==null){t.targetOrigin="*";return o.call(this,m,t);}return o.call(this,m,"*",tr);};}catch(e){}})();</script>'
                     if '<head>' in content_text:
                         content_text = content_text.replace('<head>', '<head>' + pm_shim)
                     elif '<html>' in content_text:
@@ -198,6 +205,11 @@ def gstatic_proxy(domain, endpoint):
                 content_text = re.sub(r'po\.integrity\s*=\s*[\'"][^\'"]*[\'"];?', '', content_text)
                 content_text = content_text.replace('https://www.google.com/recaptcha/', f'/recaptcha_proxy/{domain}/')
                 content_text = content_text.replace('https://www.gstatic.com/recaptcha/', f'/gstatic_proxy/{domain}/')
+                if 'javascript' in content_type:
+                    content_text = content_text.replace('B.postMessage(Rv,z[24](6,y,X),[O.port2])', 'B.postMessage(Rv,"*",[O.port2])')
+                    content_text = re.sub(r'(\.postMessage\([^,]+,)[^,]+(,\[[^\]]+\]\))', r'\1"*"\2', content_text)
+                    content_text = content_text.replace('N&&k&&C&&u.ports.length>B', 'N&&C&&u.ports.length>B')
+                    content_text = content_text.replace('Z.R(N.origin)', 'true')
                 content = content_text.encode('utf-8')
             
             r = Response(content, status=status_code, content_type=content_type)
@@ -238,23 +250,17 @@ def render_captcha_frame():
 
     console_forwarder = """<script>
     (function() {
-        try {
-            var origPM = Window.prototype.postMessage;
-            Window.prototype.postMessage = function(m, t, tr) {
-                return origPM.call(this, m, "*", tr);
-            };
-        } catch(e) {}
-        try {
-            var oPM = window.postMessage;
-            window.postMessage = function(m, t, tr) {
-                return oPM.call(window, m, "*", tr);
-            };
-        } catch(e) {}
         var _log = console.log;
         console.log = function() {
             _log.apply(console, arguments);
-            var str = Array.from(arguments).join(" ");
-            try { window.parent.postMessage({ type: "ctor-console-event", iframeId: window.name, msg: str }, "*"); } catch(e){}
+            try {
+                var str = Array.from(arguments).join(" ");
+                if (typeof str === 'string' && (str.indexOf('token:') !== -1 || str.indexOf('client_solution:') !== -1 || str.indexOf('frame loaded') !== -1 || str.indexOf('detect-active') !== -1 || str.indexOf('frame-onload') !== -1 || str.indexOf('captcha-load-error') !== -1)) {
+                    if (str.indexOf('ctor-console-event') === -1 && window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: "ctor-console-event", iframeId: window.name, msg: str }, "*");
+                    }
+                }
+            } catch(e){}
         };
         setTimeout(function() {
             console.log("frame-onload");
