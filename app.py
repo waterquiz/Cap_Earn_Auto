@@ -77,6 +77,10 @@ def get_co_for_domain(domain):
 def health():
     return jsonify({"status": "healthy"}), 200
 
+@app.route('/version', methods=['GET'])
+def version():
+    return jsonify({"version": "v1.2-universal-regex"}), 200
+
 @app.route('/store_captcha_frame', methods=['POST'])
 def store_captcha_frame():
     data = request.get_json() or {}
