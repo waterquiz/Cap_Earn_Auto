@@ -1232,67 +1232,194 @@ try {
         })();</script>
 <script>
 (function() {
-    try {
-        if (typeof customElements !== 'undefined' && !customElements.get('webview')) {
-            class WebViewElement extends HTMLElement {
-                constructor() {
-                    super();
-                    const shadow = this.attachShadow({ mode: 'open' });
-                    const iframe = document.createElement('iframe');
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    shadow.appendChild(iframe);
-                    this._iframe = iframe;
-                    
-                    // Forward events from inner iframe to parent webview element
-                    const self = this;
-                    ['did-navigate', 'did-finish-load', 'console-message', 'did-fail-load'].forEach(evtName => {
-                        iframe.addEventListener(evtName, function(e) {
-                            const newEvt = new Event(evtName);
-                            // Copy properties
-                            for (let k in e) {
-                                try { newEvt[k] = e[k]; } catch(err){}
-                            }
-                            self.dispatchEvent(newEvt);
-                        });
-                    });
-                }
-                static get observedAttributes() { return ['src']; }
-                attributeChangedCallback(name, oldValue, newValue) {
-                    if (name === 'src' && this._iframe) {
-                        this._iframe.src = newValue;
+    // 1. Intercept document.createElement & document.createElementNS for 'webview'
+    const origCreateElement = document.createElement;
+    const origCreateElementNS = document.createElementNS;
+
+    function setupWebviewMethods(el) {
+        if (!el || el._webviewSetupDone) return el;
+        el._webviewSetupDone = true;
+
+        el.clearStorageData = function() { return Promise.resolve(); };
+        el.setProxy = function() { return Promise.resolve(); };
+        el.setCookies = function() { return Promise.resolve(); };
+        el.getCookies = function() { return Promise.resolve([]); };
+        el.setUserAgent = function() { return Promise.resolve(); };
+        el.reload = function() { 
+            try { 
+                if (el.contentWindow) el.contentWindow.location.reload(); 
+            } catch(e){} 
+        };
+        el.stop = function() { 
+            try { 
+                if (el.contentWindow) el.contentWindow.stop(); 
+            } catch(e){} 
+        };
+        el.send = function() {};
+        el.openDevTools = function() {};
+        el.closeDevTools = function() {};
+        el.isDevToolsOpened = function() { return false; };
+        el.canGoBack = function() { return false; };
+        el.canGoForward = function() { return false; };
+        el.getWebContents = function() { return { id: 1, isDestroyed: function() { return false; } }; };
+        el.setZoomFactor = function() { return Promise.resolve(); };
+        el.getZoomFactor = function(cb) { if (cb) cb(1.0); return Promise.resolve(1.0); };
+        el.executeJavaScript = function() { return Promise.resolve(); };
+
+        el.findInPage = function(text, options) {
+            try {
+                if (el.contentDocument && el.contentDocument.body) {
+                    var found = el.contentDocument.body.innerText.indexOf(text) !== -1;
+                    if (found) {
+                        setTimeout(function() {
+                            var evt = new Event('found-in-page');
+                            evt.result = { matches: 1, activeMatchOrdinal: 1 };
+                            el.dispatchEvent(evt);
+                        }, 50);
                     }
                 }
-                get src() {
-                    return this._iframe ? this._iframe.src : '';
+            } catch(e) {}
+            return 1;
+        };
+        el.stopFindInPage = function() {};
+
+        el.loadURL = function(url, options) {
+            var self = this;
+            var htmlContent = '';
+            var isDataUrl = false;
+            
+            if (typeof url === 'string' && url.indexOf('data:text/html,') === 0) {
+                htmlContent = decodeURIComponent(url.substring('data:text/html,'.length));
+                isDataUrl = true;
+            } else if (typeof url === 'string' && url.indexOf('data:text/html;base64,') === 0) {
+                try {
+                    htmlContent = atob(url.substring('data:text/html;base64,'.length));
+                    isDataUrl = true;
+                } catch(e) {
+                    console.error('[Webview Shim] Base64 decode error:', e);
                 }
-                set src(val) {
-                    if (this._iframe) this._iframe.src = val;
-                    this.setAttribute('src', val);
-                }
-                get name() {
-                    return this._iframe ? this._iframe.name : '';
-                }
-                set name(val) {
-                    if (this._iframe) this._iframe.name = val;
-                    this.setAttribute('name', val);
-                }
-                loadURL(url, options) {
-                    return HTMLIFrameElement.prototype.loadURL.call(this._iframe, url, options);
-                }
-                clearStorageData() { return Promise.resolve(); }
-                setProxy() { return Promise.resolve(); }
-                setCookies() { return Promise.resolve(); }
-                getCookies() { return Promise.resolve([]); }
-                setUserAgent() { return Promise.resolve(); }
             }
-            customElements.define('webview', WebViewElement);
-        }
-    } catch (e) {
-        console.warn('[Webview Shim] Native customElements.define bypassed:', e);
+            
+            if (!isDataUrl) {
+                self.src = url;
+                setTimeout(function() {
+                    self.dispatchEvent(new Event('did-navigate'));
+                    self.dispatchEvent(new Event('did-finish-load'));
+                }, 50);
+                return Promise.resolve();
+            }
+
+            var baseUrl = (options && options.baseURLForDataURL) ? options.baseURLForDataURL : 'https://worker.captchatypers.com/';
+            var frameId = 'frame_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+            self.name = frameId;
+
+            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || window.location.origin || 'https://capearnauto-production.up.railway.app').replace(/\/+$/, '');
+            
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', captchaServer + '/store_captcha_frame', false); // Synchronous ensures backend saves before navigation
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify({ id: frameId, html: htmlContent, domain: baseUrl }));
+            } catch (err) {
+                console.error('[Webview Shim] Error storing frame:', err);
+            }
+
+            self.src = captchaServer + '/render_captcha_frame?id=' + frameId;
+
+            setTimeout(function() {
+                var loadedEvt = new Event('console-message');
+                loadedEvt.message = 'frame loaded !';
+                self.dispatchEvent(loadedEvt);
+
+                var loadedEvt2 = new Event('console-message');
+                loadedEvt2.message = 'frame-onload';
+                self.dispatchEvent(loadedEvt2);
+
+                var activeEvt = new Event('console-message');
+                activeEvt.message = 'detect-active';
+                self.dispatchEvent(activeEvt);
+
+                self.dispatchEvent(new Event('did-finish-load'));
+                self.dispatchEvent(new Event('did-navigate'));
+            }, 150);
+
+            return Promise.resolve();
+        };
+
+        return el;
     }
 
+    document.createElement = function(tagName, options) {
+        var tag = (typeof tagName === 'string') ? tagName.toLowerCase() : '';
+        if (tag === 'webview') {
+            var iframe = origCreateElement.call(document, 'iframe', options);
+            iframe.setAttribute('data-is-webview', 'true');
+            iframe.setAttribute('class', 'ct-webview-frame');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.minHeight = '480px';
+            iframe.style.border = 'none';
+            iframe.style.display = 'block';
+            iframe.style.backgroundColor = '#ffffff';
+            return setupWebviewMethods(iframe);
+        }
+        return origCreateElement.call(document, tagName, options);
+    };
+
+    document.createElementNS = function(ns, qualifiedName) {
+        if (typeof qualifiedName === 'string' && qualifiedName.toLowerCase() === 'webview') {
+            return document.createElement('webview');
+        }
+        return origCreateElementNS.call(document, ns, qualifiedName);
+    };
+
+    // Forward query selectors for 'webview' to also match the generated iframe
+    var origQuerySelectorAll = document.querySelectorAll;
+    document.querySelectorAll = function(selectors) {
+        if (typeof selectors === 'string' && selectors.indexOf('webview') !== -1) {
+            selectors = selectors.replace(/\bwebview\b/g, 'iframe[data-is-webview="true"], webview');
+        }
+        return origQuerySelectorAll.call(document, selectors);
+    };
+
+    var origQuerySelector = document.querySelector;
+    document.querySelector = function(selectors) {
+        if (typeof selectors === 'string' && selectors.indexOf('webview') !== -1) {
+            selectors = selectors.replace(/\bwebview\b/g, 'iframe[data-is-webview="true"], webview');
+        }
+        return origQuerySelector.call(document, selectors);
+    };
+
+    // Install webview methods onto HTMLIFrameElement and HTMLElement prototype
+    [HTMLIFrameElement.prototype, HTMLElement.prototype].forEach(function(proto) {
+        if (!proto) return;
+        proto.clearStorageData = function() { return Promise.resolve(); };
+        proto.setProxy = function() { return Promise.resolve(); };
+        proto.setCookies = function() { return Promise.resolve(); };
+        proto.getCookies = function() { return Promise.resolve([]); };
+        proto.setUserAgent = function() { return Promise.resolve(); };
+        proto.findInPage = function() { return 1; };
+        proto.stopFindInPage = function() {};
+        proto.getWebContents = function() { return { id: 1, isDestroyed: function() { return false; } }; };
+        proto.loadURL = function(url, options) {
+            setupWebviewMethods(this);
+            return this.loadURL(url, options);
+        };
+    });
+
+    // Intercept setAttribute('src', ...)
+    var origSetAttribute = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function(name, value) {
+        if (name === 'src' && typeof value === 'string' && (value.indexOf('data:text/html,') === 0 || value.indexOf('data:text/html;base64,') === 0)) {
+            if (typeof this.loadURL === 'function') {
+                this.loadURL(value, { baseURLForDataURL: 'https://worker.captchatypers.com/' });
+                return;
+            }
+        }
+        return origSetAttribute.call(this, name, value);
+    };
+
+    // Intercept HTMLIFrameElement.prototype.src
     if (typeof HTMLIFrameElement !== 'undefined') {
         var originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src');
         if (originalSrcDescriptor && originalSrcDescriptor.set) {
@@ -1301,6 +1428,12 @@ try {
                     return originalSrcDescriptor.get.call(this);
                 },
                 set: function(val) {
+                    if (typeof val === 'string' && (val.indexOf('data:text/html,') === 0 || val.indexOf('data:text/html;base64,') === 0)) {
+                        if (typeof this.loadURL === 'function') {
+                            this.loadURL(val, { baseURLForDataURL: 'https://worker.captchatypers.com/' });
+                            return;
+                        }
+                    }
                     originalSrcDescriptor.set.call(this, val);
                     var iframe = this;
                     setTimeout(function() {
@@ -1310,84 +1443,29 @@ try {
                 }
             });
         }
-        HTMLIFrameElement.prototype.loadURL = function(url, options) {
-            var iframe = this;
-            var htmlContent = '';
-            
-            if (url.startsWith('data:text/html,')) {
-                htmlContent = decodeURIComponent(url.substring('data:text/html,'.length));
-            } else if (url.startsWith('data:text/html;base64,')) {
-                htmlContent = atob(url.substring('data:text/html;base64,'.length));
-            } else {
-                iframe.src = url;
-                return Promise.resolve();
-            }
-            var baseUrl = (options && options.baseURLForDataURL) ? options.baseURLForDataURL : 'https://worker.captchatypers.com/';
-            var frameId = 'frame_' + Math.random().toString(36).substring(2) + '_' + Date.now();
-            if (!iframe.name) {
-                iframe.name = frameId;
-            }
-            // Synchronous XHR ensures HTML is saved in memory before iframe navigates
-            var captchaServer = (window.CAPTCHA_SERVER_URL || localStorage.getItem('CAPTCHA_SERVER_URL') || 'https://capearnauto-production.up.railway.app').replace(/\/+$/, '');
-            try {
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', captchaServer + '/store_captcha_frame', false); // Synchronous
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify({ id: frameId, html: htmlContent, domain: baseUrl }));
-            } catch(e) {
-                console.error('[Sync Store Error]', e);
-            }
-            iframe.src = captchaServer + '/render_captcha_frame?id=' + frameId;
-            setTimeout(function() {
-                var loadedEvt = new Event('console-message');
-                loadedEvt.message = 'frame loaded !';
-                iframe.dispatchEvent(loadedEvt);
-                
-                var loadedEvt2 = new Event('console-message');
-                loadedEvt2.message = 'frame-onload';
-                iframe.dispatchEvent(loadedEvt2);
-                
-                var activeEvt = new Event('console-message');
-                activeEvt.message = 'detect-active';
-                iframe.dispatchEvent(activeEvt);
-                
-                iframe.dispatchEvent(new Event('did-finish-load'));
-                iframe.dispatchEvent(new Event('did-navigate'));
-            }, 100);
-            return Promise.resolve();
-        };
-        HTMLIFrameElement.prototype.clearStorageData = function() { return Promise.resolve(); };
-        HTMLIFrameElement.prototype.setProxy = function() { return Promise.resolve(); };
-        HTMLIFrameElement.prototype.setCookies = function() { return Promise.resolve(); };
-        HTMLIFrameElement.prototype.getCookies = function() { return Promise.resolve([]); };
-        HTMLIFrameElement.prototype.setUserAgent = function() { return Promise.resolve(); };
     }
-    
+
+    // Message forwarder for captcha events and solutions
     window.addEventListener('message', function(event) {
+        var msg = null;
+        var iframeId = null;
+
         if (event.data && event.data.type === 'ctor-console-event') {
-            var msg = event.data.msg;
-            if (msg === 'frame-load-error') {
-                return;
-            }
-            var iframeId = event.data.iframeId;
-            
-            // 1. Dispatch event to standard iframes
-            var iframes = document.querySelectorAll('iframe');
-            iframes.forEach(function(iframe) {
-                if (!iframeId || iframe.name === iframeId || iframes.length === 1) {
+            msg = event.data.msg;
+            iframeId = event.data.iframeId;
+        } else if (typeof event.data === 'string' && (event.data.indexOf('client_solution:') !== -1 || event.data.indexOf('frame-') !== -1 || event.data.indexOf('detect-') !== -1)) {
+            msg = event.data;
+        }
+
+        if (msg) {
+            if (msg === 'frame-load-error') return;
+
+            var targets = document.querySelectorAll('iframe[data-is-webview="true"], iframe.ct-webview-frame, webview, iframe');
+            targets.forEach(function(target) {
+                if (!iframeId || target.name === iframeId || targets.length === 1) {
                     var evt = new Event('console-message');
                     evt.message = msg;
-                    iframe.dispatchEvent(evt);
-                }
-            });
-            
-            // 2. Dispatch event to custom webview elements
-            var webviews = document.querySelectorAll('webview');
-            webviews.forEach(function(webview) {
-                if (webview._iframe && (webview._iframe.name === iframeId || !iframeId || webviews.length === 1)) {
-                    var evt = new Event('console-message');
-                    evt.message = msg;
-                    webview.dispatchEvent(evt);
+                    target.dispatchEvent(evt);
                 }
             });
         }
