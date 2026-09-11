@@ -109,7 +109,10 @@ def recaptcha_proxy(domain, endpoint):
     if 'co=' in qs:
         qs = re.sub(r'co=[^&]+', f'co={co_val}', qs)
 
-    target_url = f"https://www.google.com/recaptcha/{endpoint}"
+    if endpoint.startswith('releases/'):
+        target_url = f"https://www.gstatic.com/recaptcha/{endpoint}"
+    else:
+        target_url = f"https://www.google.com/recaptcha/{endpoint}"
     if qs:
         target_url += f"?{qs}"
 
@@ -145,8 +148,8 @@ def recaptcha_proxy(domain, endpoint):
 
                 # In JS scripts (recaptcha__en.js), ensure cross-window postMessage handshake uses targetOrigin '*'
                 if 'javascript' in content_type:
-                    content_text = content_text.replace('B.postMessage(Rv,z[24](6,y,X),[O.port2])', 'B.postMessage(Rv,"*",[O.port2])')
-                    content_text = re.sub(r'(\.postMessage\([^,]+,)[^,]+(,\[[^\]]+\]\))', r'\1"*"\2', content_text)
+                    content_text = re.sub(r'(\.postMessage\([^,]+,).*?(,\[\w+\.port2\]\))', r'\1"*"\2', content_text)
+                    content_text = re.sub(r'([a-zA-Z0-9_$]+)=function\([a-zA-Z0-9_$,\s]+\)\{return\s+[\s\S]*?contentWindow[\s\S]*?:null\}(?=,\s*[a-zA-Z0-9_$]+=new Promise\()', r'\1=function(e){try{var p=(e.ports&&e.ports[0])||(e.O5&&e.O5.ports&&e.O5.ports[0])||(e.Iz&&e.Iz.ports&&e.Iz.ports[0]);if(p)return p;}catch(x){}return null;}', content_text)
                     content_text = content_text.replace('N&&k&&C&&u.ports.length>B', 'N&&C&&u.ports.length>B')
                     content_text = content_text.replace('Z.R(N.origin)', 'true')
 
@@ -206,8 +209,8 @@ def gstatic_proxy(domain, endpoint):
                 content_text = content_text.replace('https://www.google.com/recaptcha/', f'/recaptcha_proxy/{domain}/')
                 content_text = content_text.replace('https://www.gstatic.com/recaptcha/', f'/gstatic_proxy/{domain}/')
                 if 'javascript' in content_type:
-                    content_text = content_text.replace('B.postMessage(Rv,z[24](6,y,X),[O.port2])', 'B.postMessage(Rv,"*",[O.port2])')
-                    content_text = re.sub(r'(\.postMessage\([^,]+,)[^,]+(,\[[^\]]+\]\))', r'\1"*"\2', content_text)
+                    content_text = re.sub(r'(\.postMessage\([^,]+,).*?(,\[\w+\.port2\]\))', r'\1"*"\2', content_text)
+                    content_text = re.sub(r'([a-zA-Z0-9_$]+)=function\([a-zA-Z0-9_$,\s]+\)\{return\s+[\s\S]*?contentWindow[\s\S]*?:null\}(?=,\s*[a-zA-Z0-9_$]+=new Promise\()', r'\1=function(e){try{var p=(e.ports&&e.ports[0])||(e.O5&&e.O5.ports&&e.O5.ports[0])||(e.Iz&&e.Iz.ports&&e.Iz.ports[0]);if(p)return p;}catch(x){}return null;}', content_text)
                     content_text = content_text.replace('N&&k&&C&&u.ports.length>B', 'N&&C&&u.ports.length>B')
                     content_text = content_text.replace('Z.R(N.origin)', 'true')
                 content = content_text.encode('utf-8')
