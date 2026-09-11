@@ -284,6 +284,13 @@ try {
             return Promise.resolve();
         };
 
+        el.addEventListener('load', function() {
+            triggerNavigateEvents(el);
+        });
+        setTimeout(function() {
+            triggerNavigateEvents(el);
+        }, 80);
+
         return el;
     }
 
@@ -345,14 +352,30 @@ try {
         };
     });
 
+    function triggerNavigateEvents(el) {
+        setTimeout(function() {
+            try {
+                el.dispatchEvent(new Event('did-navigate'));
+                el.dispatchEvent(new Event('did-finish-load'));
+            } catch(e){}
+        }, 50);
+    }
+
     // Intercept setAttribute('src', ...)
     var origSetAttribute = Element.prototype.setAttribute;
     Element.prototype.setAttribute = function(name, value) {
-        if (name === 'src' && typeof value === 'string' && (value.indexOf('data:text/html,') === 0 || value.indexOf('data:text/html;base64,') === 0)) {
-            if (typeof this.loadURL === 'function') {
-                this.loadURL(value, { baseURLForDataURL: 'https://worker.captchatypers.com/' });
-                return;
+        if (name === 'src') {
+            if (typeof value === 'string' && (value.indexOf('data:text/html,') === 0 || value.indexOf('data:text/html;base64,') === 0)) {
+                if (typeof this.loadURL === 'function') {
+                    this.loadURL(value, { baseURLForDataURL: 'https://worker.captchatypers.com/' });
+                    return;
+                }
             }
+            origSetAttribute.call(this, name, value);
+            if (this.tagName === 'IFRAME' || this.getAttribute('data-is-webview') === 'true') {
+                triggerNavigateEvents(this);
+            }
+            return;
         }
         return origSetAttribute.call(this, name, value);
     };
@@ -373,11 +396,7 @@ try {
                         }
                     }
                     originalSrcDescriptor.set.call(this, val);
-                    var iframe = this;
-                    setTimeout(function() {
-                        iframe.dispatchEvent(new Event('did-navigate'));
-                        iframe.dispatchEvent(new Event('did-finish-load'));
-                    }, 50);
+                    triggerNavigateEvents(this);
                 }
             });
         }
